@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Reflection;
 using Comfort.Common;
 using EFT.UI;
-using HarmonyLib;
+using StashSearch.Config;
 
 #pragma warning disable
 
@@ -33,10 +33,10 @@ namespace StashSearch
 
             Log = Logger;
 
-            DebugPlusConfig.InitConfig(Config);
+            StashSearchConfig.InitConfig(Config);
 
 
-            new ItemsPanelPatch().Enable();          
+            //new ItemsPanelPatch().Enable();          
         }
 
         private void Start()

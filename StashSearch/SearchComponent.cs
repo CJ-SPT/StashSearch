@@ -1,14 +1,9 @@
 ﻿using Comfort.Common;
 using EFT.UI;
+using EFT.UI.DragAndDrop;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace StashSearch
 {
@@ -18,19 +13,28 @@ namespace StashSearch
 
         GameObject _searchObject = null;
         TMP_InputField _inputField = null;
+        
+        private ISession _session = null;
+
 
         void Start()
         {
+            // Get all of the objects we need to work with
             ItemsPanel itemsPanel = (ItemsPanel)AccessTools.Field(typeof(InventoryScreen), "_itemsPanel").GetValue(_commonUI.InventoryScreen);
-            SimpleStashPanel _simpleStash = (SimpleStashPanel)AccessTools.Field(typeof(ItemsPanel), "_simpleStashPanel").GetValue(itemsPanel);
+            SimpleStashPanel simpleStash = (SimpleStashPanel)AccessTools.Field(typeof(ItemsPanel), "_simpleStashPanel").GetValue(itemsPanel);
+            ComplexStashPanel complexStash = (ComplexStashPanel)AccessTools.Field(typeof(ItemsPanel), "_complexStashPanel").GetValue(itemsPanel);
 
-            _searchObject = Instantiate(Plugin.SearchPrefab, _simpleStash.transform);
+            // Move and resize the complex stash
+            complexStash.RectTransform.sizeDelta = new Vector2(680, -260);
+            complexStash.Transform.localPosition = new Vector3(948, 12, 0);
 
-            // FIXME: this breaks any aspect ratio thats not 16:9,
-            // Shits stupid and I dont care right now, probably also has 
-            // something to do with how Im modifiying the stash size in InventoryScreenPatch.cs
-            _searchObject.transform.localPosition = new Vector3(-340, 460, 0);
+            // Instantiate the prefab, set its anchor to the SimpleStashPanel
+            _searchObject = Instantiate(Plugin.SearchPrefab, simpleStash.transform);
+
+            // Adjust the rects anchored position
+            _searchObject.RectTransform().anchoredPosition = new Vector3(0, 73);
             
+            // Add the search listener as a delegate method
             _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();
             _inputField.onEndEdit.AddListener(delegate { Search(); });
         }
@@ -43,6 +47,8 @@ namespace StashSearch
         void Search()
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
+
+
 
             _inputField.text = string.Empty;
         }

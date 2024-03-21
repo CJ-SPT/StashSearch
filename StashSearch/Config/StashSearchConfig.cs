@@ -1,11 +1,10 @@
 ﻿using BepInEx.Configuration;
-using UnityEngine;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-namespace DebugPlus.Config
+namespace StashSearch.Config
 {
-    internal class DebugPlusConfig
+    internal class StashSearchConfig
     {
         private static readonly string header = "Debug Plus";
 
