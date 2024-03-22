@@ -7,6 +7,7 @@ using System.Reflection;
 using Comfort.Common;
 using EFT.UI;
 using StashSearch.Config;
+using StashSearch.Patches;
 
 #pragma warning disable
 
@@ -35,7 +36,7 @@ namespace StashSearch
             StashSearchConfig.InitConfig(Config);
 
 
-            //new ItemsPanelPatch().Enable();          
+            new GridViewShowPatch().Enable();          
         }
 
         private void Start()

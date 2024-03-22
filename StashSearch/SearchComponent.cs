@@ -5,8 +5,10 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using StashSearch.Patches;
 using StashSearch.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -29,8 +31,10 @@ namespace StashSearch
         private GameObject _searchRestoreButtonObject;
         private Button _searchRestoreButton;
 
+        private GameObject _unsearchedPanel;
+
         // Players main stash
-        private static StashClass _playerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
+        public static StashClass PlayerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
 
         // Stash related instances
         private ItemsPanel _itemsPanel;
@@ -42,7 +46,7 @@ namespace StashSearch
         private Tab _gearTab;
 
         // Get the session
-        private ISession _session => ClientAppUtils.GetMainApp().GetClientBackEndSession();
+        public static ISession _session => ClientAppUtils.GetMainApp().GetClientBackEndSession();
 
         /// <summary>
         /// This is a collection of items we want to show as soon as the search is complete.
@@ -55,7 +59,7 @@ namespace StashSearch
         private List<ContainerItem> _itemsToRestore = new List<ContainerItem>();
 
         // Are we in a searched state
-        private bool _isSearchedState = false;
+        public static bool IsSearchedState = false;
 
         public SearchComponent()
         {
@@ -86,19 +90,31 @@ namespace StashSearch
             // Add the search listener as a delegate method
             _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();
             _searchRestoreButton = _searchRestoreButtonObject.GetComponentInChildren<Button>();
-
-            _inputField.onEndEdit.AddListener(delegate { Search(); });
+            
+            _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
             _searchRestoreButton.onClick.AddListener(RestoreHiddenItems);
+
+            // Find the unsearched panel
+            foreach (var gameObject in _complexStash.GetComponentsInChildren(typeof(Button), true))
+            {
+                if (gameObject.name == "Unsearched Panel")
+                {
+                    _unsearchedPanel = gameObject.gameObject;
+                    SetupUnsearchedPanel();
+                    break;
+                }
+            }
         }
+
 
         /// <summary>
         /// Initializes the search
         /// </summary>
-        private void Search()
+        private IEnumerator Search()
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
 
-            if (_inputField.text == string.Empty) return;
+            if (_inputField.text == string.Empty) yield return null;
 
             // Disable the input, so the user can't search over a search and break things
             _inputField.enabled = false;
@@ -112,6 +128,8 @@ namespace StashSearch
             stopwatch.Stop();
 
             Plugin.Log.LogWarning($"Search took {stopwatch.ElapsedMilliseconds / 1000f} seconds and iterated over {itemCount} items...");
+
+            yield return null;
         }
 
         private void HideAllItemsExceptSearchedItems(string searchString)
@@ -123,13 +141,13 @@ namespace StashSearch
             searchString = searchString.ToLower();
 
             // Recursively search, starting at the player stash
-            SearchGrid(searchString, _playerStash.Grid);
+            SearchGrid(searchString, PlayerStash.Grid);
 
             // Clear any remaining items in the player stash, storing them to restore later
-            foreach (var item in _playerStash.Grid.ContainedItems.ToArray())
+            foreach (var item in PlayerStash.Grid.ContainedItems.ToArray())
             {
-                _itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = _playerStash.Grid });
-                _playerStash.Grid.Remove(item.Key);
+                _itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = PlayerStash.Grid });
+                PlayerStash.Grid.Remove(item.Key);
             }
 
             // Show the search results
@@ -141,8 +159,8 @@ namespace StashSearch
             // Itterate over all child items on the grid
             foreach (var gridItem in grid.ContainedItems.ToArray())
             {
-                Plugin.Log.LogDebug($"Item name {gridItem.Key.Name.Localized()}");
-                Plugin.Log.LogDebug($"Item location: Rotation: {gridItem.Value.r} X: {gridItem.Value.x} Y: {gridItem.Value.y}");
+               //Plugin.Log.LogDebug($"Item name {gridItem.Key.Name.Localized()}");
+               //Plugin.Log.LogDebug($"Item location: Rotation: {gridItem.Value.r} X: {gridItem.Value.x} Y: {gridItem.Value.y}");
 
                 if (IsSearchedItem(gridItem.Key, searchString))
                 {
@@ -156,13 +174,13 @@ namespace StashSearch
 
                 if (gridItem.Key is LootItemClass lootItem && lootItem.Grids.Length > 0)
                 {
-                    Plugin.Log.LogWarning($"This item has grids! : {lootItem.LocalizedName()}");
-                    Plugin.Log.LogWarning($"Item: {lootItem.LocalizedName()} contains {lootItem.GetAllItems().Count()} items");
+                    //Plugin.Log.LogWarning($"This item has grids! : {lootItem.LocalizedName()}");
+                    //Plugin.Log.LogWarning($"Item: {lootItem.LocalizedName()} contains {lootItem.GetAllItems().Count()} items");
 
                     // Iterate over all grids on the item, and recursively call the SearchGrid method
                     foreach (var subGrid in lootItem.Grids)
                     {
-                        SearchGrid(searchString, subGrid);
+                        SearchGrid(searchString, subGrid);                   
                     }
                 }
             }
@@ -184,25 +202,25 @@ namespace StashSearch
         {
             foreach (var item in _itemsToReshowAfterSearch)
             {
-                var newLoc = _playerStash.Grid.FindFreeSpace(item);
-                _playerStash.Grid.AddItemWithoutRestrictions(item, newLoc);
+                var newLoc = PlayerStash.Grid.FindFreeSpace(item);
+                PlayerStash.Grid.AddItemWithoutRestrictions(item, newLoc);
             }
 
             _healthTab.HandlePointerClick(false);
             _gearTab.HandlePointerClick(false);
 
-            _isSearchedState = true;
+            IsSearchedState = true;
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
         }
 
         private void RestoreHiddenItems()
         {
-            if (!_isSearchedState) return;
+            if (!IsSearchedState) return;
 
             // clear the stash first
-            foreach (var item in _playerStash.Grid.ContainedItems.ToArray())
+            foreach (var item in PlayerStash.Grid.ContainedItems.ToArray())
             {
-                _playerStash.Grid.Remove(item.Key);
+                PlayerStash.Grid.Remove(item.Key);
                 _itemsToReshowAfterSearch.Remove(item.Key);
             }
 
@@ -224,10 +242,18 @@ namespace StashSearch
             _gearTab.HandlePointerClick(false);
 
             // Reset the search state
-            _isSearchedState = false;
+            IsSearchedState = false;
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
             _inputField.enabled = true;
             _inputField.text = string.Empty;
+        }
+
+        private void SetupUnsearchedPanel()
+        {
+            var rectTransform = _unsearchedPanel.GetComponent<RectTransform>();
+            rectTransform.sizeDelta = new Vector2(635, 820);
+            rectTransform.anchoredPosition = new Vector2(320, -410);
+            gameObject.SetActive(true);
         }
 
         internal class ContainerItem

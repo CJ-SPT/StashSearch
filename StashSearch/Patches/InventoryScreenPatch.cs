@@ -1,31 +1,37 @@
 ﻿using Aki.Reflection.Patching;
+using EFT.UI.DragAndDrop;
 using HarmonyLib;
 using System.Reflection;
-using Aki.Reflection.Utils;
-using UnityEngine;
-using EFT.UI;
-using EFT.UI.DragAndDrop;
 
-
-namespace DebugPlus.Patches
+namespace StashSearch.Patches
 {
-    /// <summary>
-    /// We use this to check if the stash screen is open, and to resize the stash
-    /// </summary>
-    internal class ItemsPanelPatch : ModulePatch
+    internal class GridViewShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.GetDeclaredMethods(typeof(ItemsPanel))
-                .SingleCustom(m => m.Name == nameof(ItemsPanel.Show)
-                && m.GetParameters()[0].Name == "sourceContext");
+            return AccessTools.Method(typeof(GridView), nameof(GridView.Show));
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(ItemsPanel __instance, ComplexStashPanel ____complexStashPanel)
+        public static void PatchPostfix(GridView __instance)
         {
-            ____complexStashPanel.RectTransform.sizeDelta = new Vector2(680, -260);
-            ____complexStashPanel.Transform.localPosition = new Vector3(948, 12, 0);
+            // Don't do anything if search isn't enabled or the stash is null
+            if (!SearchComponent.IsSearchedState || SearchComponent.PlayerStash == null)
+            {
+                return;
+            }
+
+            // If this grid belongs to the stash, disable adding items to it
+            var rootItem = __instance.Grid.ParentItem;
+            while (rootItem.Id != SearchComponent.PlayerStash.Id && rootItem.Parent.Container.ParentItem != rootItem)
+            {
+                rootItem = rootItem.Parent.Container.ParentItem;
+            }
+
+            if (rootItem.Id == SearchComponent.PlayerStash.Id)
+            {
+                AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(__instance, true);
+            }
         }
     }
 }
