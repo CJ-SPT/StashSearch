@@ -8,6 +8,7 @@ using HarmonyLib;
 using StashSearch.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using TMPro;
@@ -46,22 +47,12 @@ namespace StashSearch
         /// <summary>
         /// This is a collection of items we want to show as soon as the search is complete.
         /// </summary>
-        private Dictionary<Item, LocationInGrid> _itemsToReshowAfterSearch = new Dictionary<Item, LocationInGrid>();
-        
-        /// <summary>
-        /// This is a collection of items we want to restore once we're done with our searched items
-        /// </summary>
-        private Dictionary<Item, LocationInGrid> _itemsToRestore = new Dictionary<Item, LocationInGrid>();
-             
-        /// <summary>
-        /// Top level cache for container items
-        /// </summary>
-        private Dictionary<Item, LocationInGrid> _itemContainerCache = new Dictionary<Item, LocationInGrid>();
+        private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
 
         /// <summary>
-        /// Primary the container, secondary key the item and finally the location in the grid of the container
+        /// This is a list of items we want to restore once we're done with our searched items
         /// </summary>
-        Dictionary<Item, Dictionary<Item, LocationInGrid>> _containerSlotLayouts = new Dictionary<Item, Dictionary<Item, LocationInGrid>>();
+        private List<ContainerItem> _itemsToRestore = new List<ContainerItem>();
 
         // Are we in a searched state
         private bool _isSearchedState = false;
@@ -109,6 +100,9 @@ namespace StashSearch
 
             if (_inputField.text == string.Empty) return;
 
+            // Disable the input, so the user can't search over a search and break things
+            _inputField.enabled = false;
+
             int itemCount = _session.Profile.Inventory.GetPlayerItems(EPlayerItems.Stash).Count();
 
             var stopwatch = Stopwatch.StartNew();
@@ -118,135 +112,57 @@ namespace StashSearch
             stopwatch.Stop();
 
             Plugin.Log.LogWarning($"Search took {stopwatch.ElapsedMilliseconds / 1000f} seconds and iterated over {itemCount} items...");
-
-            _inputField.text = string.Empty;
         }
 
         private void HideAllItemsExceptSearchedItems(string searchString)
         {
+            // Clear the search results form any prior search
+            _itemsToReshowAfterSearch.Clear();
+
             // We want to remove letter case from the equation
             searchString = searchString.ToLower();
-            
-            // Iterate over the copied collection and look for searched items
+
+            // Recursively search, starting at the player stash
+            SearchGrid(searchString, _playerStash.Grid);
+
+            // Clear any remaining items in the player stash, storing them to restore later
             foreach (var item in _playerStash.Grid.ContainedItems.ToArray())
             {
-                Plugin.Log.LogDebug($"Item name {item.Key.Name.Localized()}");
-                Plugin.Log.LogDebug($"Item location: Rotation: {item.Value.r} X: {item.Value.x} Y: {item.Value.y}");
-
-                AddContainerToCache(item.Key, item.Value);
-
-                if (IsSearchedItem(item.Key, searchString))
-                {
-                    // Search is a match, remove it
-                    _playerStash.Grid.Remove(item.Key);
-                    
-                    // Store to show it after search, and to restore it
-                    _itemsToReshowAfterSearch.Add(item.Key, item.Value);
-                    _itemsToRestore.Add(item.Key, item.Value);
-                }
-                else // Item is not a match
-                {
-                    // Remove the item
-                    _playerStash.Grid.Remove(item.Key);
-
-                    // Store the item to restore it later
-                    _itemsToRestore.Add(item.Key, item.Value);          
-                }
+                _itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = _playerStash.Grid });
+                _playerStash.Grid.Remove(item.Key);
             }
 
-            SearchContainers(searchString);
+            // Show the search results
             MoveSearchedItems();
         }
 
-        /// <summary>
-        /// Checks if the item is a container and adds it to the container cache
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="itemAddress"></param>
-        private void AddContainerToCache(Item item, LocationInGrid itemAddress)
+        private void SearchGrid(string searchString, StashGridClass grid)
         {
-            if (item.IsContainer)
+            // Itterate over all child items on the grid
+            foreach (var gridItem in grid.ContainedItems.ToArray())
             {
-                Plugin.Log.LogWarning("Container found, adding to container cache...");
-                
-                _itemContainerCache.Add(item, itemAddress);
-            }         
-        }
+                Plugin.Log.LogDebug($"Item name {gridItem.Key.Name.Localized()}");
+                Plugin.Log.LogDebug($"Item location: Rotation: {gridItem.Value.r} X: {gridItem.Value.x} Y: {gridItem.Value.y}");
 
-        /// <summary>
-        /// Searches all containers for the searched item
-        /// </summary>
-        /// <param name="searchString"></param>
-        private void SearchContainers(string searchString)
-        {
-            foreach (var container in _itemContainerCache.ToArray())
-            {
-                // Check that the container contains items
-                if (container.Key.GetAllItems().Count() == 0)
+                if (IsSearchedItem(gridItem.Key, searchString))
                 {
-                    // Remove it
-                    _itemContainerCache.Remove(container.Key);
-                    continue;
+                    // Remove the item from the container, and add it to the list of things to restore
+                    _itemsToRestore.Add(new ContainerItem() { Item = gridItem.Key, Location = gridItem.Value, Grid = grid });
+                    grid.Remove(gridItem.Key);
+
+                    // Store the item to show in search results
+                    _itemsToReshowAfterSearch.Add(gridItem.Key);
                 }
 
-                Plugin.Log.LogWarning($"Item: {container.Key.LocalizedName()} contains {container.Key.GetAllItems().Count()} items");
-
-                Dictionary<Item, LocationInGrid> itemLocations = new Dictionary<Item, LocationInGrid>();
-
-                // Itterate over all items in the container
-                foreach (var item in container.Key.GetAllItems().ToArray())
+                if (gridItem.Key is LootItemClass lootItem && lootItem.Grids.Length > 0)
                 {
-                    // Handle items with grids
-                    if (item is LootItemClass lootItem && lootItem.Grids.Length > 0)
+                    Plugin.Log.LogWarning($"This item has grids! : {lootItem.LocalizedName()}");
+                    Plugin.Log.LogWarning($"Item: {lootItem.LocalizedName()} contains {lootItem.GetAllItems().Count()} items");
+
+                    // Iterate over all grids on the item, and recursively call the SearchGrid method
+                    foreach (var subGrid in lootItem.Grids)
                     {
-                        SearchItemsInContainer(lootItem, container.Key, itemLocations, searchString);
-                        Plugin.Log.LogWarning($"This item has grids! : {item.LocalizedName()}");
-                    }
-                    else
-                    {
-                        // Handle this later
-                        Plugin.Log.LogError($"ERROR! Not an item with grids : {item.LocalizedName()}");
-                    }
-                }
-
-                // Done searching this container
-                _itemContainerCache.Remove(container.Key);
-            }
-
-
-            if (_itemContainerCache.Count > 0)
-            {
-                // recursive call until no more items exist to search
-                SearchContainers(searchString);
-            }        
-        }
-
-        /// <summary>
-        /// Searches a container for any items matching the search string
-        /// Itterate over all grids on an item, then all items on that grid
-        /// If the searched item is contained on a grid
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="itemLocations"></param>
-        /// <param name="searchString"></param>
-        private void SearchItemsInContainer(LootItemClass item, Item container, Dictionary<Item, LocationInGrid> itemLocations, string searchString)
-        {
-            // We want to keep track of the current grid index to be able to rebuild this container properly
-            int gridIndex = 0;
-
-            var containerStructure = new ContainerItemStructure();
-            containerStructure.containerId = container.Id;
-
-            // Itterate over all grids on the item
-            foreach (var grid in item.Grids.ToArray())
-            {
-                // Itterate over all child items on the grid
-                foreach (var gridItem in grid.ContainedItems.ToArray())
-                {
-                    if (IsSearchedItem(gridItem.Key, searchString))
-                    {
-                        grid.Remove(gridItem.Key);
-                        _itemsToReshowAfterSearch.Add(gridItem.Key, gridItem.Value);
+                        SearchGrid(searchString, subGrid);
                     }
                 }
             }
@@ -268,12 +184,9 @@ namespace StashSearch
         {
             foreach (var item in _itemsToReshowAfterSearch)
             {
-                var newLoc = _playerStash.Grid.FindFreeSpace(item.Key);
-                _playerStash.Grid.AddItemWithoutRestrictions(item.Key, newLoc);
+                var newLoc = _playerStash.Grid.FindFreeSpace(item);
+                _playerStash.Grid.AddItemWithoutRestrictions(item, newLoc);
             }
-
-            // Clear the dictionary, were done.
-            _itemsToReshowAfterSearch.Clear();
 
             _healthTab.HandlePointerClick(false);
             _gearTab.HandlePointerClick(false);
@@ -290,12 +203,17 @@ namespace StashSearch
             foreach (var item in _playerStash.Grid.ContainedItems.ToArray())
             {
                 _playerStash.Grid.Remove(item.Key);
+                _itemsToReshowAfterSearch.Remove(item.Key);
             }
 
             // Restore the items back in the order they were in originally.
             foreach (var item in _itemsToRestore)
             {
-                _playerStash.Grid.AddItemWithoutRestrictions(item.Key, item.Value);
+                // If the item still exists in the _itemsToShowAfterSearch dict, it means the player moved it, don't try to restore it
+                if (!_itemsToReshowAfterSearch.Contains(item.Item))
+                {
+                    item.Grid.AddItemWithoutRestrictions(item.Item, item.Location);
+                }
             }
 
             // Clear the restore dict
@@ -308,13 +226,15 @@ namespace StashSearch
             // Reset the search state
             _isSearchedState = false;
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
+            _inputField.enabled = true;
+            _inputField.text = string.Empty;
         }
 
-        private sealed class ContainerItemStructure
+        internal class ContainerItem
         {
-            public string containerId {  get; set; }
-
-            public StashGridClass[] grids { set; get; }
+            public Item Item { get; set; }
+            public LocationInGrid Location { get; set; }
+            public StashGridClass Grid { get; set; }
         }
     }
 }

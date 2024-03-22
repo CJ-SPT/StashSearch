@@ -20,22 +20,19 @@
 			<HintPath>$(SolutionDir)dependencies\Assembly-CSharp.dll</HintPath>
 		</Reference>
 		<Reference Include="bsg.console.core">
-		  <HintPath>..\dependencies\bsg.console.core.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\bsg.console.core.dll</HintPath>
 		</Reference>
 		<Reference Include="Comfort">
 			<HintPath>$(SolutionDir)dependencies\Comfort.dll</HintPath>
 		</Reference>
 		<Reference Include="ItemComponent.Types">
-		  <HintPath>..\..\DebugPlus\dependencies\ItemComponent.Types.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\ItemComponent.Types.dll</HintPath>
 		</Reference>
 		<Reference Include="Unity.TextMeshPro">
-		  <HintPath>..\..\DebugPlus\dependencies\Unity.TextMeshPro.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEditor">
-		  <HintPath>..\dependencies\UnityEditor.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\Unity.TextMeshPro.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.AssetBundleModule">
-		  <HintPath>..\..\DebugPlus\dependencies\UnityEngine.AssetBundleModule.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\UnityEngine.AssetBundleModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 			<HintPath>$(SolutionDir)dependencies\UnityEngine.CoreModule.dll</HintPath>
@@ -58,17 +55,14 @@
 		<Reference Include="BepinEx.Preloader">
 			<HintPath>$(SolutionDir)dependencies\BepInEx.Preloader.dll</HintPath>
 		</Reference>
-		<Reference Include="ConfigurationManager">
-			<HintPath>$(SolutionDir)dependencies\ConfigurationManager.dll</HintPath>
-		</Reference>
 		<Reference Include="UnityEngine.IMGUIModule">
-		  <HintPath>..\dependencies\UnityEngine.IMGUIModule.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\UnityEngine.IMGUIModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.InputLegacyModule">
-		  <HintPath>..\dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
 		</Reference>
 		<Reference Include="UnityEngine.UI">
-		  <HintPath>..\..\DebugPlus\dependencies\UnityEngine.UI.dll</HintPath>
+		  <HintPath>$(SolutionDir)dependencies\UnityEngine.UI.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
