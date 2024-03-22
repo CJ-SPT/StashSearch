@@ -36,7 +36,8 @@ namespace StashSearch
             StashSearchConfig.InitConfig(Config);
 
 
-            new GridViewShowPatch().Enable();          
+            new GridViewShowPatch().Enable();
+            new TradingScreenShowPatch().Enable();
         }
 
         private void Start()
