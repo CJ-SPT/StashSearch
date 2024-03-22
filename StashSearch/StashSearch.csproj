@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
 	  <AssemblyName>StashSearch</AssemblyName>
-	  <Description>Get better debugging information from EFT</Description>
+	  <Description>Search the stash with ease!</Description>
 	  <Version>1.0.0</Version>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <LangVersion>latest</LangVersion>
@@ -24,6 +24,9 @@
 		</Reference>
 		<Reference Include="Comfort">
 			<HintPath>$(SolutionDir)dependencies\Comfort.dll</HintPath>
+		</Reference>
+		<Reference Include="ItemComponent.Types">
+		  <HintPath>..\..\DebugPlus\dependencies\ItemComponent.Types.dll</HintPath>
 		</Reference>
 		<Reference Include="Unity.TextMeshPro">
 		  <HintPath>..\..\DebugPlus\dependencies\Unity.TextMeshPro.dll</HintPath>
@@ -69,13 +72,9 @@
 		</Reference>
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Utils\" />
-	</ItemGroup>
-
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.8.0 - Dev\BepInEx\config\com.dirtbikercj.debugplus.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\SearchStashField.bundle&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\&quot; /Y" />
+		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.8.0 - Dev\BepInEx\config\com.dirtbikercj.debugplus.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\StashSearch.bundle&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\&quot; /Y" />
 	</Target>
 
 

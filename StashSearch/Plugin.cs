@@ -1,7 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using DebugPlus.Config;
-using DebugPlus.Patches;
 using System.IO;
 using System;
 using UnityEngine;
@@ -22,7 +20,8 @@ namespace StashSearch
 
         public static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public static GameObject SearchPrefab;
+        public static GameObject SearchBoxPrefab;
+        public static GameObject SearchRestoreButtonPrefab;
 
         public static bool IsInstantiated = false;
 
@@ -62,14 +61,17 @@ namespace StashSearch
 
         private void LoadBundle()
         {
-            var bundlePath = Path.Combine(PluginFolder, "SearchStashField.bundle");
-            var bundle = AssetBundle.LoadFromFile(bundlePath);
+            var searchField = Path.Combine(PluginFolder, "StashSearch.bundle");
+            
+            var bundle = AssetBundle.LoadFromFile(searchField);
+
             if (bundle == null)
             {
-                throw new Exception($"Error loading bundle: {bundlePath}");
+                throw new Exception($"Error loading bundles");
             }
 
-            SearchPrefab = LoadAsset<GameObject>(bundle, "SearchStashField.prefab");
+            SearchBoxPrefab = LoadAsset<GameObject>(bundle, "SearchStashField.prefab");
+            SearchRestoreButtonPrefab = LoadAsset<GameObject>(bundle, "SearchStashRestoreButton.prefab");
         }
 
         private T LoadAsset<T>(AssetBundle bundle, string assetPath) where T : UnityEngine.Object
