@@ -21,7 +21,8 @@ namespace StashSearch
 
         public static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public static GameObject SearchBoxPrefab;
+        public static GameObject PlayerSearchBoxPrefab;
+        public static GameObject TraderSearchBoxPrefab;
         public static GameObject SearchRestoreButtonPrefab;
 
         public static bool IsInstantiated = false;
@@ -37,7 +38,7 @@ namespace StashSearch
 
 
             new GridViewShowPatch().Enable();
-            new TradingScreenShowPatch().Enable();
+            new TraderDealScreenShowPatch().Enable();
         }
 
         private void Start()
@@ -72,7 +73,8 @@ namespace StashSearch
                 throw new Exception($"Error loading bundles");
             }
 
-            SearchBoxPrefab = LoadAsset<GameObject>(bundle, "SearchStashField.prefab");
+            PlayerSearchBoxPrefab = LoadAsset<GameObject>(bundle, "SearchStashField.prefab");
+            TraderSearchBoxPrefab = LoadAsset<GameObject>(bundle, "SearchTraderStashField.prefab");
             SearchRestoreButtonPrefab = LoadAsset<GameObject>(bundle, "SearchStashRestoreButton.prefab");
         }
 

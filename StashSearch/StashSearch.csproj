@@ -64,6 +64,9 @@
 		<Reference Include="UnityEngine.UI">
 		  <HintPath>$(SolutionDir)dependencies\UnityEngine.UI.dll</HintPath>
 		</Reference>
+		<Reference Include="UnityEngine.UIModule">
+		  <HintPath>..\..\DebugPlus\dependencies\UnityEngine.UIModule.dll</HintPath>
+		</Reference>
 	</ItemGroup>
 
 

@@ -80,7 +80,7 @@ namespace StashSearch
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
 
             // Instantiate the prefab, set its anchor to the SimpleStashPanel
-            _searchObject = Instantiate(Plugin.SearchBoxPrefab, _simpleStash.transform);
+            _searchObject = Instantiate(Plugin.PlayerSearchBoxPrefab, _simpleStash.transform);
             _searchRestoreButtonObject = Instantiate(Plugin.SearchRestoreButtonPrefab, _simpleStash.transform);
 
             // Adjust the rects anchored position
@@ -114,7 +114,7 @@ namespace StashSearch
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
 
-            if (_inputField.text == string.Empty) yield return null;
+            if (_inputField.text == string.Empty) yield break;
 
             // Disable the input, so the user can't search over a search and break things
             _inputField.enabled = false;
@@ -129,7 +129,7 @@ namespace StashSearch
 
             Plugin.Log.LogWarning($"Search took {stopwatch.ElapsedMilliseconds / 1000f} seconds and iterated over {itemCount} items...");
 
-            yield return null;
+            yield break;
         }
 
         private void HideAllItemsExceptSearchedItems(string searchString)
