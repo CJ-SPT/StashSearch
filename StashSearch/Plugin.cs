@@ -52,7 +52,7 @@ namespace StashSearch
             {
                 var inventoryScreen = Singleton<CommonUI>.Instance.InventoryScreen;
 
-                inventoryScreen.GetOrAddComponent<SearchComponent>();
+                inventoryScreen.GetOrAddComponent<StashComponent>();
 
                 IsInstantiated = true;
             }
