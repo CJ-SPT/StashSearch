@@ -91,5 +91,25 @@ namespace StashSearch
             _searchBoxObjectPlayer.RectTransform().anchoredPosition = new Vector2(-70, 76);
             _searchButtonObjectPlayer.RectTransform().anchoredPosition = new Vector2(270, 76);
         }
+
+        private void SearchStash()
+        {
+
+        }
+
+        private void SearchTrader()
+        {
+
+        }
+
+        private void ClearStashSearch()
+        {
+
+        }
+
+        private void ClearTraderSearch()
+        {
+
+        }
     }     
 }

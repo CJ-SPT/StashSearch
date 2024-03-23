@@ -23,9 +23,8 @@ namespace StashSearch.Utils
         /// </summary>
         private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
 
-        public SearchController(string parentGridId) 
+        public SearchController() 
         {
-            ParentGridId = parentGridId;
         }
 
         /// <summary>
@@ -33,9 +32,10 @@ namespace StashSearch.Utils
         /// </summary>
         /// <param name="searchString">Search input string</param>
         /// <param name="gridToSearch">Grid to search</param>
-        public void Search(string searchString, StashGridClass gridToSearch)
+        public void Search(string searchString, StashGridClass gridToSearch, string parentGridID)
         {
             IsSearchedState = true;
+            ParentGridId = parentGridID;
 
             // Set context of what grid we searched
             if (SearchedGrid == null)

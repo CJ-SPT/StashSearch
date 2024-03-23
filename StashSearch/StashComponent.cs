@@ -30,7 +30,7 @@ namespace StashSearch
         private Button _searchRestoreButton;
 
         // Players main stash
-        public static StashClass PlayerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
+        private static StashClass _playerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
 
         // Stash related instances
         private ItemsPanel _itemsPanel;
@@ -77,7 +77,7 @@ namespace StashSearch
             _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
             _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch()); });
 
-            _searchController = new SearchController(PlayerStash.Id);
+            _searchController = new SearchController();
         }
 
 
@@ -98,7 +98,7 @@ namespace StashSearch
             var stopwatch = Stopwatch.StartNew();         
 
             // Recursively search, starting at the player stash
-            _searchController.Search(_inputField.text, PlayerStash.Grid);
+            _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
 
@@ -115,7 +115,7 @@ namespace StashSearch
 
         private IEnumerator ClearSearch()
         {
-            _searchController.RestoreHiddenItems(PlayerStash.Grid);
+            _searchController.RestoreHiddenItems(_playerStash.Grid);
 
             // refresh the UI
             _healthTab.HandlePointerClick(false);
