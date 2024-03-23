@@ -23,6 +23,8 @@ namespace StashSearch.Utils
         /// </summary>
         private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
 
+        private char[] _trimChars = [' ', ',', '.', '/', '\\'];
+
         public SearchController() 
         {
         }
@@ -155,11 +157,29 @@ namespace StashSearch.Utils
         /// <returns></returns>
         private bool IsSearchedItem(Item item, string searchString)
         {
-            if (item.LocalizedName().ToLower() == searchString.ToLower())
+            string[] splitSearchString = searchString.Split(',');
+
+            // Search short name first
+            var fullName = item.LocalizedName().ToLower();         
+            bool match = splitSearchString.Any(x => fullName.Contains(x.Trim(_trimChars)));
+
+            // Search full name second
+            if (!match)
             {
-                return true;
+                var shortName = item.LocalizedShortName().ToLower();
+
+                match = splitSearchString.Any(x => shortName.Contains(x.Trim(_trimChars)));
             }
-            return false;
+
+            // No match by name, check item parent now.
+            if (!match)
+            {
+                var itemParent = item.Template._parent.ToLower();
+
+                match = splitSearchString.Any(x => itemParent.Contains(x.Trim(_trimChars)));
+            }
+
+            return match;
         }
 
         /// <summary>
@@ -172,13 +192,18 @@ namespace StashSearch.Utils
                 foreach (var item in _itemsToReshowAfterSearch.ToArray())
                 {
                     var newLoc = SearchedGrid.FindFreeSpace(item);
-                    SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
+                    
+                    // Search yielded more results than can fit in the stash, trim the results
+                    if (newLoc == null)
+                    { 
+                        Plugin.Log.LogWarning("Search yieled more results than stash space. Trimming results.");
+                        _itemsToReshowAfterSearch.Clear();
+                        break;
+                    }
+                    
+                    var result = SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
+                                      
                     _itemsToReshowAfterSearch.Remove(item);
-                }
-
-                if (_itemsToReshowAfterSearch.Count() > 0)
-                {
-                    throw new InvalidOperationException("Not all items restored!");
                 }
             }
             catch (Exception e)

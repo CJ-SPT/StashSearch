@@ -92,7 +92,7 @@ namespace StashSearch
 
             // Disable the input, so the user can't search over a search and break things
             _inputField.enabled = false;
-  
+
             // Recursively search, starting at the player stash
             _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
 
