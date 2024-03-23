@@ -77,7 +77,7 @@ namespace StashSearch
             _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
             _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch()); });
 
-            _searchController = new SearchController();
+            _searchController = new SearchController(PlayerStash.Id);
         }
 
 

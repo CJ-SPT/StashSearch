@@ -11,6 +11,8 @@ namespace StashSearch.Utils
 
         public static StashGridClass SearchedGrid = null;
 
+        public static string ParentGridId;
+
         /// <summary>
         /// This is a list of items we want to restore once we're done with our searched items
         /// </summary>
@@ -21,9 +23,9 @@ namespace StashSearch.Utils
         /// </summary>
         private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
 
-        public SearchController() 
+        public SearchController(string parentGridId) 
         {
-
+            ParentGridId = parentGridId;
         }
 
         /// <summary>
@@ -33,6 +35,8 @@ namespace StashSearch.Utils
         /// <param name="gridToSearch">Grid to search</param>
         public void Search(string searchString, StashGridClass gridToSearch)
         {
+            IsSearchedState = true;
+
             // Set context of what grid we searched
             if (SearchedGrid == null)
             {
@@ -90,6 +94,7 @@ namespace StashSearch.Utils
 
                 // Reset the search state
                 IsSearchedState = false;
+                SearchedGrid = null;
             }
             catch (Exception e)
             {
@@ -175,8 +180,6 @@ namespace StashSearch.Utils
                 {
                     throw new InvalidOperationException("Not all items restored!");
                 }
-
-                IsSearchedState = true;
             }
             catch (Exception e)
             {
