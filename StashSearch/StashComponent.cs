@@ -92,11 +92,7 @@ namespace StashSearch
 
             // Disable the input, so the user can't search over a search and break things
             _inputField.enabled = false;
-
-            int itemCount = _session.Profile.Inventory.GetPlayerItems(EPlayerItems.Stash).Count();
-
-            var stopwatch = Stopwatch.StartNew();         
-
+  
             // Recursively search, starting at the player stash
             _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
 
@@ -105,10 +101,6 @@ namespace StashSearch
             // Refresh the UI
             _healthTab.HandlePointerClick(false);
             _gearTab.HandlePointerClick(false);
-
-            stopwatch.Stop();
-
-            Plugin.Log.LogInfo($"Search took {stopwatch.ElapsedMilliseconds / 1000f} seconds and iterated over {itemCount} items...");
 
             yield break;
         }

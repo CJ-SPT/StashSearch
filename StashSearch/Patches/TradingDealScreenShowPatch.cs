@@ -4,22 +4,22 @@ using HarmonyLib;
 using System.Reflection;
 namespace StashSearch.Patches
 {
-    internal class TraderDealScreenShowPatch : ModulePatch
+    internal class TraderScreenGroupPatch : ModulePatch
     {
-        public static TraderDealScreen TraderDealScreen;
+        public static TraderScreensGroup TraderDealGroup;
 
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.FirstMethod(typeof(TraderDealScreen), 
+            return AccessTools.FirstMethod(typeof(TraderScreensGroup), 
                 x => x.Name == nameof(TradingScreen.Show)
-                && x.GetParameters()[0].Name == "trader");
+                && x.GetParameters()[0].Name == "controller");
         }
 
         [PatchPostfix]
-        public static void PatchPostfix(TraderDealScreen __instance)
+        public static void PatchPostfix(TraderScreensGroup __instance)
         {
             __instance.GetOrAddComponent<TraderScreenComponent>();
-            TraderDealScreen = __instance;
+            TraderDealGroup = __instance;
         }
     }
 }

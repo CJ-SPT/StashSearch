@@ -38,7 +38,7 @@ namespace StashSearch
 
 
             new GridViewShowPatch().Enable();
-            new TraderDealScreenShowPatch().Enable();
+            new TraderScreenGroupPatch().Enable();
         }
 
         private void Start()
