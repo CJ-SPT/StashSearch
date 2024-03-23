@@ -26,6 +26,11 @@ namespace StashSearch.Utils
 
         }
 
+        /// <summary>
+        /// Initialize the search
+        /// </summary>
+        /// <param name="searchString">Search input string</param>
+        /// <param name="gridToSearch">Grid to search</param>
         public void Search(string searchString, StashGridClass gridToSearch)
         {
             // Set context of what grid we searched
@@ -52,6 +57,11 @@ namespace StashSearch.Utils
             MoveSearchedItems();
         }
 
+        /// <summary>
+        /// Restore to presearched state
+        /// </summary>
+        /// <param name="gridToRestore"></param>
+        /// <exception cref="Exception"></exception>
         public void RestoreHiddenItems(StashGridClass gridToRestore)
         {
             try
@@ -87,6 +97,12 @@ namespace StashSearch.Utils
             }
         }
 
+        /// <summary>
+        /// Recursive search of the grid
+        /// </summary>
+        /// <param name="searchString">Search input string</param>
+        /// <param name="gridToSearch">Target grid to search, called recursively</param>
+        /// <exception cref="Exception"></exception>
         private void SearchGrid(string searchString, StashGridClass gridToSearch)
         {
             try
@@ -126,6 +142,12 @@ namespace StashSearch.Utils
             }      
         }
 
+        /// <summary>
+        /// Is the item a searched item
+        /// </summary>
+        /// <param name="item">Item to check</param>
+        /// <param name="searchString">Search input string</param>
+        /// <returns></returns>
         private bool IsSearchedItem(Item item, string searchString)
         {
             if (item.LocalizedName().ToLower() == searchString.ToLower())
