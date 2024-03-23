@@ -1,8 +1,5 @@
 ﻿using EFT.UI;
-using EFT.UI.DragAndDrop;
-using HarmonyLib;
 using StashSearch.Patches;
-using System.ComponentModel;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;

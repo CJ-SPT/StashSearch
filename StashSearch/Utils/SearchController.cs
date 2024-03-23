@@ -2,7 +2,6 @@
 using EFT.InventoryLogic;
 using System.Collections.Generic;
 using System.Linq;
-using static ObjectInHandsAnimator;
 
 namespace StashSearch.Utils
 {
