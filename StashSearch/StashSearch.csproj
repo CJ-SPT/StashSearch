@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
-	  <AssemblyName>StashSearch</AssemblyName>
-	  <Description>Search the stash with ease!</Description>
-	  <Version>1.0.0</Version>
-	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	  <LangVersion>latest</LangVersion>
+      <AssemblyName>StashSearch</AssemblyName>
+      <Description>Search the stash with ease!</Description>
+      <Version>1.0.0</Version>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,64 +15,64 @@
     <None Remove="dependencies\**" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Reference Include="Assembly-CSharp">
-			<HintPath>$(SolutionDir)dependencies\Assembly-CSharp.dll</HintPath>
-		</Reference>
-		<Reference Include="bsg.console.core">
-		  <HintPath>$(SolutionDir)dependencies\bsg.console.core.dll</HintPath>
-		</Reference>
-		<Reference Include="Comfort">
-			<HintPath>$(SolutionDir)dependencies\Comfort.dll</HintPath>
-		</Reference>
-		<Reference Include="ItemComponent.Types">
-		  <HintPath>$(SolutionDir)dependencies\ItemComponent.Types.dll</HintPath>
-		</Reference>
-		<Reference Include="Unity.TextMeshPro">
-		  <HintPath>$(SolutionDir)dependencies\Unity.TextMeshPro.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.AssetBundleModule">
-		  <HintPath>$(SolutionDir)dependencies\UnityEngine.AssetBundleModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.CoreModule">
-			<HintPath>$(SolutionDir)dependencies\UnityEngine.CoreModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine">
-			<HintPath>$(SolutionDir)dependencies\UnityEngine.dll</HintPath>
-		</Reference>
-		<Reference Include="Aki.reflection">
-			<HintPath>$(SolutionDir)dependencies\Aki.Reflection.dll</HintPath>
-		</Reference>
-		<Reference Include="Sirenix.Serialization">
-			<HintPath>$(SolutionDir)dependencies\Sirenix.Serialization.dll</HintPath>
-		</Reference>
-		<Reference Include="0Harmony">
-			<HintPath>$(SolutionDir)dependencies\0Harmony.dll</HintPath>
-		</Reference>
-		<Reference Include="BepinEx">
-			<HintPath>$(SolutionDir)dependencies\BepInEx.dll</HintPath>
-		</Reference>
-		<Reference Include="BepinEx.Preloader">
-			<HintPath>$(SolutionDir)dependencies\BepInEx.Preloader.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.IMGUIModule">
-		  <HintPath>$(SolutionDir)dependencies\UnityEngine.IMGUIModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.InputLegacyModule">
-		  <HintPath>$(SolutionDir)dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.UI">
-		  <HintPath>$(SolutionDir)dependencies\UnityEngine.UI.dll</HintPath>
-		</Reference>
-		<Reference Include="UnityEngine.UIModule">
-		  <HintPath>..\..\DebugPlus\dependencies\UnityEngine.UIModule.dll</HintPath>
-		</Reference>
-	</ItemGroup>
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(SolutionDir)dependencies\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="bsg.console.core">
+            <HintPath>$(SolutionDir)dependencies\bsg.console.core.dll</HintPath>
+        </Reference>
+        <Reference Include="Comfort">
+            <HintPath>$(SolutionDir)dependencies\Comfort.dll</HintPath>
+        </Reference>
+        <Reference Include="ItemComponent.Types">
+            <HintPath>$(SolutionDir)dependencies\ItemComponent.Types.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(SolutionDir)dependencies\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.AssetBundleModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="Aki.reflection">
+            <HintPath>$(SolutionDir)dependencies\Aki.Reflection.dll</HintPath>
+        </Reference>
+        <Reference Include="Sirenix.Serialization">
+            <HintPath>$(SolutionDir)dependencies\Sirenix.Serialization.dll</HintPath>
+        </Reference>
+        <Reference Include="0Harmony">
+            <HintPath>$(SolutionDir)dependencies\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="BepinEx">
+            <HintPath>$(SolutionDir)dependencies\BepInEx.dll</HintPath>
+        </Reference>
+        <Reference Include="BepinEx.Preloader">
+            <HintPath>$(SolutionDir)dependencies\BepInEx.Preloader.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(SolutionDir)dependencies\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>$(Solutiondir)dependencies\UnityEngine.UIModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.8.0 - Dev\BepInEx\config\com.dirtbikercj.debugplus.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\StashSearch.bundle&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\&quot; /Y" />
-	</Target>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.8.0 - Dev\BepInEx\plugins\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.8.0 - Dev\BepInEx\config\com.dirtbikercj.debugplus.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\StashSearch.bundle&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\&quot; /Y" />
+    </Target>
 
 
 </Project>
