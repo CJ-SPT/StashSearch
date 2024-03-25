@@ -7,6 +7,7 @@ using EFT.UI.DragAndDrop;
 using HarmonyLib;
 using StashSearch.Utils;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using TMPro;
@@ -80,6 +81,27 @@ namespace StashSearch
             _searchController = new SearchController();
         }
 
+        private void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
+        {
+            if (searchResult != null)
+            {
+                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
+                // This is required because BSG's code is broken
+                var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
+
+                foreach (var itemView in gridItemDict.Values.ToArray())
+                {
+                    if (!itemView.BeingDragged && !searchResult.Contains(itemView.Item))
+                    {
+                        gridItemDict.Remove(itemView.Item.Id);
+                        itemView.Kill();
+                    }
+                }
+            }
+
+            // Trigger the gridView to redraw
+            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
+        }
 
         /// <summary>
         /// Initializes the search
@@ -94,13 +116,12 @@ namespace StashSearch
             _inputField.enabled = false;
 
             // Recursively search, starting at the player stash
-            _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
-
-            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
+            HashSet<Item> searchResult = _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
 
             // Refresh the UI
-            _healthTab.HandlePointerClick(false);
-            _gearTab.HandlePointerClick(false);
+            RefreshGridView(_gridView, searchResult);
+
+            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
 
             yield break;
         }
@@ -110,14 +131,14 @@ namespace StashSearch
             _searchController.RestoreHiddenItems(_playerStash.Grid);
 
             // refresh the UI
-            _healthTab.HandlePointerClick(false);
-            _gearTab.HandlePointerClick(false);
+            RefreshGridView(_gridView);
 
             // Enable user input
             _inputField.enabled = true;
             _inputField.text = string.Empty;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
+
             yield break;
         }
     }

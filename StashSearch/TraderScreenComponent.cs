@@ -8,6 +8,12 @@ using UnityEngine.UI;
 using StashSearch.Utils;
 using System.Collections;
 using EFT;
+using System;
+using Aki.Reflection.Utils;
+using System.Linq;
+using EFT.InventoryLogic;
+using System.Reflection;
+using System.Collections.Generic;
 
 namespace StashSearch
 {
@@ -131,6 +137,28 @@ namespace StashSearch
             _searchButtonObjectPlayer.RectTransform().anchoredPosition = new Vector2(270, 76);
         }
 
+        private void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
+        {
+            if (searchResult != null)
+            {
+                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
+                // This is required because BSG's code is broken
+                var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
+
+                foreach (var itemView in gridItemDict.Values.ToArray())
+                {
+                    if (!itemView.BeingDragged && !searchResult.Contains(itemView.Item))
+                    {
+                        gridItemDict.Remove(itemView.Item.Id);
+                        itemView.Kill();
+                    }
+                }
+            }
+
+            // Trigger the gridView to redraw
+            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
+        }
+
         private IEnumerator SearchStash()
         {
             if (_inputFieldPlayer.text == string.Empty) yield break;
@@ -139,12 +167,12 @@ namespace StashSearch
             _inputFieldPlayer.enabled = false;
 
             // Recursively search, starting at the player stash
-            _searchControllerPlayer.Search(_inputFieldPlayer.text, _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
-
-            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, true);
+            HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text, _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
 
             // refresh the UI
-            StaticManager.BeginCoroutine(UpdatePlayerView());
+            RefreshGridView(_gridViewPlayer, searchResult);
+
+            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, true);
 
             yield break;
         }
@@ -154,7 +182,7 @@ namespace StashSearch
             _searchControllerPlayer.RestoreHiddenItems(_gridViewPlayer.Grid);
 
             // refresh the UI
-            StaticManager.BeginCoroutine(UpdatePlayerView());
+            RefreshGridView(_gridViewPlayer);
 
             // Enable user input
             _inputFieldPlayer.enabled = true;
@@ -165,15 +193,6 @@ namespace StashSearch
             yield break;
         }
 
-        private IEnumerator UpdatePlayerView()
-        {
-            _scrollRectPlayer.normalizedPosition = Vector2.zero;
-
-            yield return new WaitForSeconds(0.5f);
-
-            _scrollRectPlayer.normalizedPosition = Vector2.up;
-        }
-
         private IEnumerator SearchTrader()
         {
             if (_inputFieldTrader.text == string.Empty) yield break;
@@ -182,35 +201,30 @@ namespace StashSearch
             _inputFieldTrader.enabled = false;
 
             // Search the trader
-            _searchControllerTrader.Search(_inputFieldTrader.text, _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
+            HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text, _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
 
             // refresh the UI
-            StaticManager.BeginCoroutine(UpdateTraderView());
+            RefreshGridView(_gridViewTrader, searchResult);
+
+            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, true);
             
             yield break;
         }
 
         private IEnumerator ClearTraderSearch()
         {
-            _searchControllerTrader.RestoreHiddenItems(_gridViewPlayer.Grid);
+            _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
 
             // refresh the UI
-            StaticManager.BeginCoroutine(UpdateTraderView());
+            RefreshGridView(_gridViewTrader);
 
             // Enable user input
             _inputFieldTrader.enabled = true;
             _inputFieldTrader.text = string.Empty;
 
+            AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, false);
+
             yield break;
-        }
-
-        private IEnumerator UpdateTraderView()
-        {
-            _scrollRectTrader.normalizedPosition = Vector2.zero;
-            
-            yield return new WaitForSeconds(0.5f);
-
-            _scrollRectTrader.normalizedPosition = Vector2.up;
         }
     }     
 }

@@ -34,7 +34,7 @@ namespace StashSearch.Utils
         /// </summary>
         /// <param name="searchString">Search input string</param>
         /// <param name="gridToSearch">Grid to search</param>
-        public void Search(string searchString, StashGridClass gridToSearch, string parentGridID)
+        public HashSet<Item> Search(string searchString, StashGridClass gridToSearch, string parentGridID)
         {
             IsSearchedState = true;
             ParentGridId = parentGridID;
@@ -61,6 +61,8 @@ namespace StashSearch.Utils
             Plugin.Log.LogDebug($"Found {_itemsToReshowAfterSearch.Count()} results in search");
 
             MoveSearchedItems();
+
+            return _itemsToReshowAfterSearch;
         }
 
         /// <summary>
@@ -187,23 +189,28 @@ namespace StashSearch.Utils
         /// </summary>
         private void MoveSearchedItems()
         {
+            bool overflowShown = false;
             try
             {
+                // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE
+                //       It will break moving an item out of the search results
                 foreach (var item in _itemsToReshowAfterSearch.ToArray())
                 {
                     var newLoc = SearchedGrid.FindFreeSpace(item);
                     
                     // Search yielded more results than can fit in the stash, trim the results
                     if (newLoc == null)
-                    { 
-                        Plugin.Log.LogWarning("Search yieled more results than stash space. Trimming results.");
+                    {
+                        if (!overflowShown)
+                        {
+                            Plugin.Log.LogWarning("Search yielded more results than stash space. Trimming results.");
+                            overflowShown = true;
+                        }
                         _itemsToReshowAfterSearch.Clear();
-                        break;
+                        continue;
                     }
                     
-                    var result = SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
-                                      
-                    _itemsToReshowAfterSearch.Remove(item);
+                    SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
                 }
             }
             catch (Exception e)
