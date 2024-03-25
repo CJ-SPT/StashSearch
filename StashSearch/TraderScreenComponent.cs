@@ -167,7 +167,7 @@ namespace StashSearch
             _inputFieldPlayer.enabled = false;
 
             // Recursively search, starting at the player stash
-            HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text, _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
+            HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
 
             // refresh the UI
             RefreshGridView(_gridViewPlayer, searchResult);
@@ -201,7 +201,7 @@ namespace StashSearch
             _inputFieldTrader.enabled = false;
 
             // Search the trader
-            HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text, _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
+            HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
 
             // refresh the UI
             RefreshGridView(_gridViewTrader, searchResult);

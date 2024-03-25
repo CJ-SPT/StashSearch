@@ -116,7 +116,7 @@ namespace StashSearch
             _inputField.enabled = false;
 
             // Recursively search, starting at the player stash
-            HashSet<Item> searchResult = _searchController.Search(_inputField.text, _playerStash.Grid, _playerStash.Id);
+            HashSet<Item> searchResult = _searchController.Search(_inputField.text.ToLower(), _playerStash.Grid, _playerStash.Id);
 
             // Refresh the UI
             RefreshGridView(_gridView, searchResult);
