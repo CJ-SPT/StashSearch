@@ -6,9 +6,8 @@ namespace StashSearch.Config
 {
     internal class StashSearchConfig
     {
-        private static readonly string header = "Debug Plus";
-
-        
+        private static readonly string header = "Stash Search";
+      
         public static void InitConfig(ConfigFile config)
         {
             

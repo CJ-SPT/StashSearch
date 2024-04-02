@@ -8,14 +8,19 @@ using Comfort.Common;
 using EFT.UI;
 using StashSearch.Config;
 using StashSearch.Patches;
+using System.Collections.Generic;
+using StashSearch.Utils;
+using DrakiaXYZ.VersionChecker;
 
 #pragma warning disable
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.0")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.1")]
     public class Plugin : BaseUnityPlugin
     {
+        public const int TarkovVersion = 29197;
+
         public static Plugin? Instance;
         public static ManualLogSource Log;
 
@@ -27,8 +32,15 @@ namespace StashSearch
 
         public static bool IsInstantiated = false;
 
+        internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
+
         internal void Awake()
         {
+            if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
+            {
+                throw new Exception("Invalid EFT Version");
+            }
+
             Instance = this;
             DontDestroyOnLoad(this);
 
@@ -36,9 +48,9 @@ namespace StashSearch
 
             StashSearchConfig.InitConfig(Config);
 
-
             new GridViewShowPatch().Enable();
             new TraderScreenGroupPatch().Enable();
+            new OnScreenChangedPatch().Enable();
         }
 
         private void Start()
@@ -59,7 +71,7 @@ namespace StashSearch
             else
             {
                 IsInstantiated = false;
-            }
+            }   
         }
 
         private void LoadBundle()

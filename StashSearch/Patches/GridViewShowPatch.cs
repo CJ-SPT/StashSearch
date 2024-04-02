@@ -1,7 +1,6 @@
 ﻿using Aki.Reflection.Patching;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
-using StashSearch.Utils;
 using System.Reflection;
 
 namespace StashSearch.Patches
@@ -16,24 +15,27 @@ namespace StashSearch.Patches
         [PatchPostfix]
         public static void PatchPostfix(GridView __instance)
         {
-            // Don't do anything if search isn't enabled or the searched grid is null
-            if (!SearchController.IsSearchedState || SearchController.SearchedGrid == null)
+            foreach (var controller in Plugin.SearchControllers)
             {
-                return;
-            }
+                // Don't do anything if search isn't enabled or the searched grid is null
+                if (!controller.IsSearchedState || controller.SearchedGrid == null)
+                {
+                    return;
+                }
 
-            // If this grid belongs to the stash, disable adding items to it
-            var rootItem = __instance.Grid.ParentItem;
-            while (rootItem.Id != SearchController.ParentGridId && rootItem.Parent.Container.ParentItem != rootItem)
-            {
-                rootItem = rootItem.Parent.Container.ParentItem;
-            }
+                // If this grid belongs to the stash, disable adding items to it
+                var rootItem = __instance.Grid.ParentItem;
+                while (rootItem.Id != controller.ParentGridId && rootItem.Parent.Container.ParentItem != rootItem)
+                {
+                    rootItem = rootItem.Parent.Container.ParentItem;
+                }
 
-            if (rootItem.Id == SearchController.ParentGridId)
-            {
-                Plugin.Log.LogDebug("Setting grid non interactable.");
-                AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(__instance, true);
-            }
+                if (rootItem.Id == controller.ParentGridId)
+                {
+                    Plugin.Log.LogDebug("Setting grid non interactable.");
+                    AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(__instance, true);
+                }
+            }        
         }
     }
 }

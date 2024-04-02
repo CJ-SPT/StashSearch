@@ -2,22 +2,13 @@
 using EFT.InventoryLogic;
 using System.Collections.Generic;
 using System.Linq;
+using EFT.UI.DragAndDrop;
+using HarmonyLib;
 
 namespace StashSearch.Utils
 {
-    internal class SearchController
+    internal class SearchController : AbstractSearchController
     {
-        public static bool IsSearchedState = false;
-
-        public static StashGridClass SearchedGrid = null;
-
-        public static string ParentGridId;
-
-        /// <summary>
-        /// This is a list of items we want to restore once we're done with our searched items
-        /// </summary>
-        private List<ContainerItem> _itemsToRestore = new List<ContainerItem>();
-
         /// <summary>
         /// This is a collection of items we want to show as soon as the search is complete.
         /// </summary>
@@ -54,7 +45,7 @@ namespace StashSearch.Utils
             // Clear any remaining items in the player stash, storing them to restore later
             foreach (var item in SearchedGrid.ContainedItems.ToArray())
             {
-                _itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = gridToSearch });
+                itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = gridToSearch });
                 SearchedGrid.Remove(item.Key);
             }
 
@@ -70,7 +61,7 @@ namespace StashSearch.Utils
         /// </summary>
         /// <param name="gridToRestore"></param>
         /// <exception cref="Exception"></exception>
-        public void RestoreHiddenItems(StashGridClass gridToRestore)
+        public override void RestoreHiddenItems(StashGridClass gridToRestore)
         {
             try
             {
@@ -84,7 +75,7 @@ namespace StashSearch.Utils
                 }
 
                 // Restore the items back in the order they were in originally.
-                foreach (var item in _itemsToRestore)
+                foreach (var item in itemsToRestore)
                 {
                     // If the item still exists in the _itemsToShowAfterSearch dict, it means the player moved it, don't try to restore it
                     if (!_itemsToReshowAfterSearch.Contains(item.Item))
@@ -94,7 +85,7 @@ namespace StashSearch.Utils
                 }
 
                 // Clear the restore dict
-                _itemsToRestore.Clear();
+                itemsToRestore.Clear();
 
                 // Reset the search state
                 IsSearchedState = false;
@@ -104,6 +95,33 @@ namespace StashSearch.Utils
             {
                 throw new Exception("Search action exception:", e);
             }
+        }
+
+        /// <summary>
+        /// Refreshes the grid view after search
+        /// </summary>
+        /// <param name="gridView"></param>
+        /// <param name="searchResult"></param>
+        public void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
+        {
+            if (searchResult != null)
+            {
+                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
+                // This is required because BSG's code is broken
+                var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
+
+                foreach (var itemView in gridItemDict.Values.ToArray())
+                {
+                    if (!itemView.BeingDragged && !searchResult.Contains(itemView.Item))
+                    {
+                        gridItemDict.Remove(itemView.Item.Id);
+                        itemView.Kill();
+                    }
+                }
+            }
+
+            // Trigger the gridView to redraw
+            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
         }
 
         /// <summary>
@@ -125,7 +143,7 @@ namespace StashSearch.Utils
                     if (IsSearchedItem(gridItem.Key, searchString))
                     {
                         // Remove the item from the container, and add it to the list of things to restore
-                        _itemsToRestore.Add(new ContainerItem() { Item = gridItem.Key, Location = gridItem.Value, Grid = gridToSearch });
+                        itemsToRestore.Add(new ContainerItem() { Item = gridItem.Key, Location = gridItem.Value, Grid = gridToSearch });
                         gridToSearch.Remove(gridItem.Key);
 
                         // Store the item to show in search results
@@ -217,7 +235,7 @@ namespace StashSearch.Utils
             {
                 throw new Exception("Search action exception:", e);
             }  
-        }       
+        }
     }
 
     internal class ContainerItem

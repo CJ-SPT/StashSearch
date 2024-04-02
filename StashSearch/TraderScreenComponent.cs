@@ -8,11 +8,7 @@ using UnityEngine.UI;
 using StashSearch.Utils;
 using System.Collections;
 using EFT;
-using System;
-using Aki.Reflection.Utils;
-using System.Linq;
 using EFT.InventoryLogic;
-using System.Reflection;
 using System.Collections.Generic;
 
 namespace StashSearch
@@ -103,6 +99,9 @@ namespace StashSearch
             _searchControllerPlayer = new SearchController();
             _searchControllerTrader = new SearchController();
 
+            Plugin.SearchControllers.Add(_searchControllerPlayer);
+            Plugin.SearchControllers.Add(_searchControllerTrader);
+
             // Add our listeners
 
             _inputFieldPlayer.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(SearchStash()); });
@@ -137,28 +136,6 @@ namespace StashSearch
             _searchButtonObjectPlayer.RectTransform().anchoredPosition = new Vector2(270, 76);
         }
 
-        private void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
-        {
-            if (searchResult != null)
-            {
-                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
-                // This is required because BSG's code is broken
-                var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
-
-                foreach (var itemView in gridItemDict.Values.ToArray())
-                {
-                    if (!itemView.BeingDragged && !searchResult.Contains(itemView.Item))
-                    {
-                        gridItemDict.Remove(itemView.Item.Id);
-                        itemView.Kill();
-                    }
-                }
-            }
-
-            // Trigger the gridView to redraw
-            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
-        }
-
         private IEnumerator SearchStash()
         {
             if (_inputFieldPlayer.text == string.Empty) yield break;
@@ -170,7 +147,7 @@ namespace StashSearch
             HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
 
             // refresh the UI
-            RefreshGridView(_gridViewPlayer, searchResult);
+            _searchControllerPlayer.RefreshGridView(_gridViewPlayer, searchResult);
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, true);
 
@@ -182,7 +159,7 @@ namespace StashSearch
             _searchControllerPlayer.RestoreHiddenItems(_gridViewPlayer.Grid);
 
             // refresh the UI
-            RefreshGridView(_gridViewPlayer);
+            _searchControllerPlayer.RefreshGridView(_gridViewPlayer);
 
             // Enable user input
             _inputFieldPlayer.enabled = true;
@@ -204,7 +181,7 @@ namespace StashSearch
             HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
 
             // refresh the UI
-            RefreshGridView(_gridViewTrader, searchResult);
+            _searchControllerPlayer.RefreshGridView(_gridViewTrader, searchResult);
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, true);
             
@@ -216,7 +193,7 @@ namespace StashSearch
             _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
 
             // refresh the UI
-            RefreshGridView(_gridViewTrader);
+            _searchControllerPlayer.RefreshGridView(_gridViewTrader);
 
             // Enable user input
             _inputFieldTrader.enabled = true;

@@ -8,8 +8,6 @@ using HarmonyLib;
 using StashSearch.Utils;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -79,28 +77,7 @@ namespace StashSearch
             _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch()); });
 
             _searchController = new SearchController();
-        }
-
-        private void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
-        {
-            if (searchResult != null)
-            {
-                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
-                // This is required because BSG's code is broken
-                var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
-
-                foreach (var itemView in gridItemDict.Values.ToArray())
-                {
-                    if (!itemView.BeingDragged && !searchResult.Contains(itemView.Item))
-                    {
-                        gridItemDict.Remove(itemView.Item.Id);
-                        itemView.Kill();
-                    }
-                }
-            }
-
-            // Trigger the gridView to redraw
-            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
+            Plugin.SearchControllers.Add(_searchController);
         }
 
         /// <summary>
@@ -119,7 +96,7 @@ namespace StashSearch
             HashSet<Item> searchResult = _searchController.Search(_inputField.text.ToLower(), _playerStash.Grid, _playerStash.Id);
 
             // Refresh the UI
-            RefreshGridView(_gridView, searchResult);
+            _searchController.RefreshGridView(_gridView, searchResult);
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
 
@@ -131,7 +108,7 @@ namespace StashSearch
             _searchController.RestoreHiddenItems(_playerStash.Grid);
 
             // refresh the UI
-            RefreshGridView(_gridView);
+            _searchController.RefreshGridView(_gridView);
 
             // Enable user input
             _inputField.enabled = true;
