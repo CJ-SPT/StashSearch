@@ -170,6 +170,41 @@ namespace StashSearch.Utils
         }
 
         /// <summary>
+        /// Move searched items to the top of the stash
+        /// </summary>
+        private void MoveSearchedItems()
+        {
+            bool overflowShown = false;
+            try
+            {
+                // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE
+                //       It will break moving an item out of the search results
+                foreach (var item in _itemsToReshowAfterSearch.ToArray())
+                {
+                    var newLoc = SearchedGrid.FindFreeSpace(item);
+
+                    // Search yielded more results than can fit in the stash, trim the results
+                    if (newLoc == null)
+                    {
+                        if (!overflowShown)
+                        {
+                            Plugin.Log.LogWarning("Search yielded more results than stash space. Trimming results.");
+                            overflowShown = true;
+                        }
+                        _itemsToReshowAfterSearch.Clear();
+                        continue;
+                    }
+
+                    SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
+                }
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Search action exception:", e);
+            }
+        }
+
+        /// <summary>
         /// Is the item a searched item
         /// </summary>
         /// <param name="item">Item to check</param>
@@ -178,6 +213,11 @@ namespace StashSearch.Utils
         private bool IsSearchedItem(Item item, string searchString)
         {
             string[] splitSearchString = searchString.Split(',');
+
+            if (splitSearchString.Any(x => x.Contains("@")))
+            {
+                return IsSearchTermItemClass(item, splitSearchString);
+            }
 
             // Search short name first
             var fullName = item.LocalizedName().ToLower();         
@@ -203,38 +243,62 @@ namespace StashSearch.Utils
         }
 
         /// <summary>
-        /// Move searched items to the top of the stash
+        /// search term starts with @ and points to a specific item class
         /// </summary>
-        private void MoveSearchedItems()
+        /// <param name="item"></param>
+        /// <param name="searchString"></param>
+        /// <returns></returns>
+        private bool IsSearchTermItemClass(Item item, string[] searchTerms)
         {
-            bool overflowShown = false;
-            try
-            {
-                // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE
-                //       It will break moving an item out of the search results
-                foreach (var item in _itemsToReshowAfterSearch.ToArray())
-                {
-                    var newLoc = SearchedGrid.FindFreeSpace(item);
-                    
-                    // Search yielded more results than can fit in the stash, trim the results
-                    if (newLoc == null)
-                    {
-                        if (!overflowShown)
-                        {
-                            Plugin.Log.LogWarning("Search yielded more results than stash space. Trimming results.");
-                            overflowShown = true;
-                        }
-                        _itemsToReshowAfterSearch.Clear();
-                        continue;
-                    }
-                    
-                    SearchedGrid.AddItemWithoutRestrictions(item, newLoc);
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception("Search action exception:", e);
-            }  
+            if (searchTerms.Any(x => x.Contains("@weapon")) && item is Weapon)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@magazine")) && item is MagazineClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@ammo")) && (item is BulletClass || item is AmmoBox))
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@meds")) && item is MedsClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@food")) && item is FoodClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@knife")) && item is KnifeClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@mod")) && item is Mod)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@grenade")) && item is GrenadeClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@barter")) && item is GClass2704)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@rig")) && item is GClass2685)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@goggles")) && item is GogglesClass)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@container")) && (item is SearchableItemClass || item is GClass2686))
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@armor")) && item is GClass2637)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@info")) && item is GClass2738)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@keys")) && item is GClass2720)
+                return true;
+
+            if (searchTerms.Any(x => x.Contains("@fir")) && item.MarkedAsSpawnedInSession)
+                return true;
+
+            return false;
         }
     }
 

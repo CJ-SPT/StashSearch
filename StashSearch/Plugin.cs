@@ -16,7 +16,7 @@ using DrakiaXYZ.VersionChecker;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.1")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.2")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
