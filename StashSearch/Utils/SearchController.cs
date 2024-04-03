@@ -179,7 +179,7 @@ namespace StashSearch.Utils
             {
                 // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE
                 //       It will break moving an item out of the search results
-                foreach (var item in _itemsToReshowAfterSearch.ToArray())
+                foreach (var item in _itemsToReshowAfterSearch.ToArray().OrderBy(x => x.LocalizedName()))
                 {
                     var newLoc = SearchedGrid.FindFreeSpace(item);
 
