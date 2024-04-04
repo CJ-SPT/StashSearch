@@ -11,6 +11,7 @@ using StashSearch.Patches;
 using System.Collections.Generic;
 using StashSearch.Utils;
 using DrakiaXYZ.VersionChecker;
+using EFT;
 
 #pragma warning disable
 
@@ -30,7 +31,8 @@ namespace StashSearch
         public static GameObject TraderSearchBoxPrefab;
         public static GameObject SearchRestoreButtonPrefab;
 
-        public static bool IsInstantiated = false;
+        private bool _isActive = false;
+        private bool _isInstantiated = false;
 
         internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
 
@@ -60,18 +62,30 @@ namespace StashSearch
 
         public void Update()
         {
-            if (Singleton<CommonUI>.Instantiated & !IsInstantiated)
+            if (Singleton<CommonUI>.Instantiated && !_isActive && !_isInstantiated)
             {
                 var inventoryScreen = Singleton<CommonUI>.Instance.InventoryScreen;
-
                 inventoryScreen.GetOrAddComponent<StashComponent>();
 
-                IsInstantiated = true;
+                _isActive = true;
+                _isInstantiated = true;
             }
-            else
+
+            if (!_isInstantiated)
             {
-                IsInstantiated = false;
-            }   
+                return;
+            }
+
+            if (Singleton<GameWorld>.Instantiated && _isActive)
+            {
+                Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = false;
+                _isActive = false;
+            }
+            else if (!Singleton<GameWorld>.Instantiated && !_isActive)
+            {
+                Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = true;
+                _isActive = true;
+            }
         }
 
         private void LoadBundle()
