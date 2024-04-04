@@ -213,10 +213,10 @@ namespace StashSearch.Utils
         private bool IsSearchedItem(Item item, string searchString)
         {
             string[] splitSearchString = searchString.Split(',');
-
-            if (splitSearchString.Any(x => x.Contains("@")))
+            
+            if (IsSearchTermItemClass(item, splitSearchString))
             {
-                return IsSearchTermItemClass(item, splitSearchString);
+                return true;
             }
 
             // Search short name first
