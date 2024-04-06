@@ -199,7 +199,7 @@ namespace StashSearch
 
         private IEnumerator ClearStashSearch()
         {
-            if (_gridViewTradingTable.Grid.ItemCollection.Count > 0)
+            if (_gridViewTradingTable?.Grid?.ItemCollection != null && _gridViewTradingTable.Grid.ItemCollection.Count > 0)
             {
                 NotificationManagerClass.DisplayMessageNotification(
                         "Cannot clear search with items in the trading table.",

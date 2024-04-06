@@ -89,7 +89,7 @@ namespace StashSearch
                 _inputField.ActivateInputField();
             }
 
-            if (StashSearchConfig.ClearSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Trader)
+            if (StashSearchConfig.ClearSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Inventory)
             {
                 if (_searchController.IsSearchedState)
                 {
