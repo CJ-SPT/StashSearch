@@ -1,4 +1,4 @@
-using Aki.Reflection.Utils;
+﻿using Aki.Reflection.Utils;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -80,6 +80,11 @@ namespace StashSearch
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
+        }
+
+        private void OnDisable()
+        {
+            _inputField.text = string.Empty;
         }
 
         private void Update()

@@ -1,4 +1,4 @@
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
@@ -126,6 +126,12 @@ namespace StashSearch
 
             // Adjust the trader UI
             AdjustTraderUI();
+        }
+
+        private void OnDisable()
+        {
+            _inputFieldPlayer.text = string.Empty;
+            _inputFieldTrader.text = string.Empty;
         }
 
         private void Update()
