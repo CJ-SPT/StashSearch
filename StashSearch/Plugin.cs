@@ -53,7 +53,6 @@ namespace StashSearch
             new GridViewShowPatch().Enable();
             new TraderScreenGroupPatch().Enable();
             new OnScreenChangedPatch().Enable();
-            new InputManagerPatch().Enable();
             new SortingTablePatch().Enable();
         }
 
