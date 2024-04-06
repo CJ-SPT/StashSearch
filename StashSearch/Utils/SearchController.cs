@@ -9,6 +9,8 @@ namespace StashSearch.Utils
 {
     internal class SearchController : AbstractSearchController
     {
+        public static GridViewOwner LastSearchedGrid = GridViewOwner.None;
+
         /// <summary>
         /// This is a collection of items we want to show as soon as the search is complete.
         /// </summary>
@@ -307,5 +309,13 @@ namespace StashSearch.Utils
         public Item Item { get; set; }
         public LocationInGrid Location { get; set; }
         public StashGridClass Grid { get; set; }
+    }
+
+    internal enum GridViewOwner
+    {
+        None,
+        Player,
+        PlayerTradingScreen,
+        Trader
     }
 }

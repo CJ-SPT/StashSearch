@@ -4,7 +4,10 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
+using EFT.UI.Screens;
 using HarmonyLib;
+using StashSearch.Config;
+using StashSearch.Patches;
 using StashSearch.Utils;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,10 +25,12 @@ namespace StashSearch
 
         // Search GameObject and TMP_InputField
         private GameObject _searchObject;
+
         private TMP_InputField _inputField;
 
         // Button GameObject
         private GameObject _searchRestoreButtonObject;
+
         private Button _searchRestoreButton;
 
         // Players main stash
@@ -33,12 +38,11 @@ namespace StashSearch
 
         // Stash related instances
         private ItemsPanel _itemsPanel;
+
         private SimpleStashPanel _simpleStash;
+        private ScrollRect _scrollRect;
         private ComplexStashPanel _complexStash;
         private GridView _gridView => _complexStash.GetComponentInChildren<GridView>();
-
-        private Tab _healthTab;
-        private Tab _gearTab;
 
         // Get the session
         public static ISession _session => ClientAppUtils.GetMainApp().GetClientBackEndSession();
@@ -52,10 +56,8 @@ namespace StashSearch
             // Get all of the objects we need to work with
             _itemsPanel = (ItemsPanel)AccessTools.Field(typeof(InventoryScreen), "_itemsPanel").GetValue(_commonUI.InventoryScreen);
             _simpleStash = (SimpleStashPanel)AccessTools.Field(typeof(ItemsPanel), "_simpleStashPanel").GetValue(_itemsPanel);
+            _scrollRect = (ScrollRect)AccessTools.Field(typeof(SimpleStashPanel), "_stashScroll").GetValue(_simpleStash);
             _complexStash = (ComplexStashPanel)AccessTools.Field(typeof(ItemsPanel), "_complexStashPanel").GetValue(_itemsPanel);
-
-            _healthTab = (Tab)AccessTools.Field(typeof(InventoryScreen), "_healthTab").GetValue(_commonUI.InventoryScreen);
-            _gearTab = (Tab)AccessTools.Field(typeof(InventoryScreen), "_gearTab").GetValue(_commonUI.InventoryScreen);
 
             // Move and resize the complex stash
             _complexStash.RectTransform.sizeDelta = new Vector2(680, -260);
@@ -72,12 +74,28 @@ namespace StashSearch
             // Add the search listener as a delegate method
             _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();
             _searchRestoreButton = _searchRestoreButtonObject.GetComponentInChildren<Button>();
-            
+
             _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
             _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch()); });
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
+        }
+
+        private void Update()
+        {
+            if (StashSearchConfig.FocusSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Inventory)
+            {
+                _inputField.ActivateInputField();
+            }
+
+            if (StashSearchConfig.ClearSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Trader)
+            {
+                if (_searchController.IsSearchedState)
+                {
+                    StaticManager.BeginCoroutine(ClearSearch());
+                }
+            }
         }
 
         /// <summary>
@@ -92,11 +110,15 @@ namespace StashSearch
             // Disable the input, so the user can't search over a search and break things
             _inputField.enabled = false;
 
+            // Set the last searched grid, so we know what to reset on the clear keybind
+            SearchController.LastSearchedGrid = GridViewOwner.Player;
+
             // Recursively search, starting at the player stash
             HashSet<Item> searchResult = _searchController.Search(_inputField.text.ToLower(), _playerStash.Grid, _playerStash.Id);
 
             // Refresh the UI
             _searchController.RefreshGridView(_gridView, searchResult);
+            _scrollRect.normalizedPosition = Vector3.up;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
 
@@ -109,6 +131,7 @@ namespace StashSearch
 
             // refresh the UI
             _searchController.RefreshGridView(_gridView);
+            _scrollRect.normalizedPosition = Vector3.up;
 
             // Enable user input
             _inputField.enabled = true;

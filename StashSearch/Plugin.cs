@@ -1,23 +1,23 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using System.IO;
-using System;
-using UnityEngine;
-using System.Reflection;
 using Comfort.Common;
+using DrakiaXYZ.VersionChecker;
+using EFT;
 using EFT.UI;
 using StashSearch.Config;
 using StashSearch.Patches;
-using System.Collections.Generic;
 using StashSearch.Utils;
-using DrakiaXYZ.VersionChecker;
-using EFT;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using UnityEngine;
 
 #pragma warning disable
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.2")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.3")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
@@ -53,6 +53,8 @@ namespace StashSearch
             new GridViewShowPatch().Enable();
             new TraderScreenGroupPatch().Enable();
             new OnScreenChangedPatch().Enable();
+            new InputManagerPatch().Enable();
+            new SortingTablePatch().Enable();
         }
 
         private void Start()
@@ -91,7 +93,7 @@ namespace StashSearch
         private void LoadBundle()
         {
             var searchField = Path.Combine(PluginFolder, "StashSearch.bundle");
-            
+
             var bundle = AssetBundle.LoadFromFile(searchField);
 
             if (bundle == null)

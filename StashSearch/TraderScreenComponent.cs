@@ -1,15 +1,17 @@
-﻿using EFT.UI;
+﻿using EFT;
+using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.UI.DragAndDrop;
+using EFT.UI.Screens;
 using HarmonyLib;
+using StashSearch.Config;
 using StashSearch.Patches;
+using StashSearch.Utils;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using StashSearch.Utils;
-using System.Collections;
-using EFT;
-using EFT.InventoryLogic;
-using System.Collections.Generic;
 
 namespace StashSearch
 {
@@ -20,28 +22,35 @@ namespace StashSearch
 
         // "Left Player" and "Right Player" stash transforms
         private RectTransform _rectTransformTrader;
+
         private RectTransform _rectTransformPlayer;
 
         // Search GameObject and TMP_InputField Player
         private GameObject _searchBoxObjectPlayer;
+
         private TMP_InputField _inputFieldPlayer;
 
         // Button GameObject
         private GameObject _searchButtonObjectPlayer;
+
         private Button _searchRestoreButtonPlayer;
 
         // Search GameObject and TMP_InputField Trader
         private GameObject _searchBoxObjectTrader;
+
         private TMP_InputField _inputFieldTrader;
 
         // Button GameObject Trader
         private GameObject _searchButtonObjectTrader;
+
         private Button _searchRestoreButtonTrader;
         private DefaultUIButton _updateAssort;
 
         // Grid views
         private TradingGridView _gridViewPlayer;
+
         private TradingGridView _gridViewTrader;
+        private TradingTableGridView _gridViewTradingTable;
 
         private SearchController _searchControllerPlayer;
         private SearchController _searchControllerTrader;
@@ -49,8 +58,10 @@ namespace StashSearch
         private ScrollRect _scrollRectPlayer;
         private ScrollRect _scrollRectTrader;
 
+        private bool _isPlayerGridFocused = false;
+
         public TraderScreenComponent()
-        { 
+        {
         }
 
         private void Start()
@@ -69,7 +80,7 @@ namespace StashSearch
                 // Trader
                 if (component.name == "Left Person")
                 {
-                    _rectTransformTrader = component.GetComponent<RectTransform>();              
+                    _rectTransformTrader = component.GetComponent<RectTransform>();
                 }
 
                 // Player
@@ -95,6 +106,9 @@ namespace StashSearch
             _gridViewPlayer = (TradingGridView)AccessTools.Field(typeof(TraderDealScreen), "_stashGridView").GetValue(_traderDealScreen);
             _gridViewTrader = (TradingGridView)AccessTools.Field(typeof(TraderDealScreen), "_traderGridView").GetValue(_traderDealScreen);
 
+            var tradingTable = (TradingTable)AccessTools.Field(typeof(TraderDealScreen), "_tradingTable").GetValue(_traderDealScreen);
+            _gridViewTradingTable = (TradingTableGridView)AccessTools.Field(typeof(TradingTable), "_tableGridView").GetValue(tradingTable);
+
             // Instantiate a search controller for each grid
             _searchControllerPlayer = new SearchController();
             _searchControllerTrader = new SearchController();
@@ -116,13 +130,38 @@ namespace StashSearch
 
         private void Update()
         {
+            if (StashSearchConfig.FocusSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Trader)
+            {
+                if (_isPlayerGridFocused)
+                {
+                    _inputFieldTrader.ActivateInputField();
+                    _isPlayerGridFocused = false;
+                }
+                else
+                {
+                    _inputFieldPlayer.ActivateInputField();
+                    _isPlayerGridFocused = true;
+                }
+            }
+
+            if (StashSearchConfig.ClearSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Trader)
+            {
+                if (SearchController.LastSearchedGrid == GridViewOwner.PlayerTradingScreen)
+                {
+                    StaticManager.BeginCoroutine(ClearStashSearch());
+                }
+                else if (SearchController.LastSearchedGrid == GridViewOwner.Trader)
+                {
+                    StaticManager.BeginCoroutine(ClearTraderSearch());
+                }
+            }
         }
 
         private void AdjustTraderUI()
         {
             // Trader grid
             _rectTransformTrader.RectTransform().sizeDelta = new Vector2(640, -325);
-            
+
             // Player grid
             _rectTransformPlayer.RectTransform().sizeDelta = new Vector2(640, -325);
             _rectTransformPlayer.RectTransform().anchoredPosition = new Vector2(-8, -250);
@@ -146,8 +185,12 @@ namespace StashSearch
             // Recursively search, starting at the player stash
             HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
 
+            // Set the last searched grid, so we know what to reset on the clear keybind
+            SearchController.LastSearchedGrid = GridViewOwner.PlayerTradingScreen;
+
             // refresh the UI
             _searchControllerPlayer.RefreshGridView(_gridViewPlayer, searchResult);
+            _scrollRectPlayer.normalizedPosition = Vector3.up;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, true);
 
@@ -156,10 +199,21 @@ namespace StashSearch
 
         private IEnumerator ClearStashSearch()
         {
+            if (_gridViewTradingTable.Grid.ItemCollection.Count > 0)
+            {
+                NotificationManagerClass.DisplayMessageNotification(
+                        "Cannot clear search with items in the trading table.",
+                        EFT.Communications.ENotificationDurationType.Default,
+                        EFT.Communications.ENotificationIconType.Alert);
+
+                yield break;
+            }
+
             _searchControllerPlayer.RestoreHiddenItems(_gridViewPlayer.Grid);
 
             // refresh the UI
             _searchControllerPlayer.RefreshGridView(_gridViewPlayer);
+            _scrollRectPlayer.normalizedPosition = Vector3.up;
 
             // Enable user input
             _inputFieldPlayer.enabled = true;
@@ -180,11 +234,15 @@ namespace StashSearch
             // Search the trader
             HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
 
+            // Set the last searched grid, so we know what to reset on the clear keybind
+            SearchController.LastSearchedGrid = GridViewOwner.Trader;
+
             // refresh the UI
             _searchControllerPlayer.RefreshGridView(_gridViewTrader, searchResult);
+            _scrollRectTrader.normalizedPosition = Vector3.up;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, true);
-            
+
             yield break;
         }
 
@@ -194,6 +252,7 @@ namespace StashSearch
 
             // refresh the UI
             _searchControllerPlayer.RefreshGridView(_gridViewTrader);
+            _scrollRectTrader.normalizedPosition = Vector3.up;
 
             // Enable user input
             _inputFieldTrader.enabled = true;
@@ -203,5 +262,5 @@ namespace StashSearch
 
             yield break;
         }
-    }     
+    }
 }
