@@ -1,4 +1,4 @@
-﻿using EFT;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
@@ -177,12 +177,12 @@ namespace StashSearch
 
         private IEnumerator SearchStash()
         {
-            // don't bother searching if term is the same as current search
-            if (_inputFieldPlayer.text == _searchControllerPlayer.CurrentSearchString) yield break;
-
             // clear search if one is already pending
             if (_searchControllerPlayer.IsSearchedState)
             {
+                // don't bother searching if term is the same as current search
+                if (_inputFieldPlayer.text == _searchControllerPlayer.CurrentSearchString) yield break;
+
                 // avoid losing items if trading table not empty
                 if (!CheckTradingTableEmpty())
                 {
@@ -235,12 +235,12 @@ namespace StashSearch
 
         private IEnumerator SearchTrader()
         {
-            // don't bother searching if term is the same as current search
-            if (_inputFieldTrader.text == _searchControllerTrader.CurrentSearchString) yield break;
-
             // clear search if one is already pending
             if (_searchControllerTrader.IsSearchedState)
             {
+                // don't bother searching if term is the same as current search
+                if (_inputFieldTrader.text == _searchControllerTrader.CurrentSearchString) yield break;
+
                 yield return ClearTraderSearch(false);
             }
 

@@ -1,4 +1,4 @@
-﻿using Aki.Reflection.Utils;
+using Aki.Reflection.Utils;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -114,12 +114,12 @@ namespace StashSearch
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
 
-            // don't bother searching if term is the same as current search
-            if (_inputField.text == _searchController.CurrentSearchString) yield break;
-
             // clear search if one is already pending
             if (_searchController.IsSearchedState)
             {
+                // don't bother searching if term is the same as current search
+                if (_inputField.text == _searchController.CurrentSearchString) yield break;
+
                 yield return ClearSearch(false);
             }
 
