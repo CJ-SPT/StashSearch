@@ -76,7 +76,7 @@ namespace StashSearch
             _searchRestoreButton = _searchRestoreButtonObject.GetComponentInChildren<Button>();
 
             _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
-            _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch()); });
+            _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch(true)); });
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
@@ -86,14 +86,23 @@ namespace StashSearch
         {
             if (StashSearchConfig.FocusSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Inventory)
             {
-                _inputField.ActivateInputField();
+                if (_inputField.isFocused)
+                {
+                    // highlight text inside if already active
+                    _inputField.selectionAnchorPosition = 0;
+                    _inputField.selectionFocusPosition = _inputField.text.Length;
+                }
+                else
+                {
+                    _inputField.ActivateInputField();
+                }
             }
 
             if (StashSearchConfig.ClearSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Inventory)
             {
                 if (_searchController.IsSearchedState)
                 {
-                    StaticManager.BeginCoroutine(ClearSearch());
+                    StaticManager.BeginCoroutine(ClearSearch(true));
                 }
             }
         }
@@ -105,10 +114,16 @@ namespace StashSearch
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
 
-            if (_inputField.text == string.Empty) yield break;
+            // don't bother searching if term is the same as current search
+            if (_inputField.text == _searchController.CurrentSearchString) yield break;
 
-            // Disable the input, so the user can't search over a search and break things
-            _inputField.enabled = false;
+            // clear search if one is already pending
+            if (_searchController.IsSearchedState)
+            {
+                yield return ClearSearch(false);
+            }
+
+            if (_inputField.text == string.Empty) yield break;
 
             // Set the last searched grid, so we know what to reset on the clear keybind
             SearchController.LastSearchedGrid = GridViewOwner.Player;
@@ -125,7 +140,11 @@ namespace StashSearch
             yield break;
         }
 
-        private IEnumerator ClearSearch()
+        /// <summary>
+        /// Clears the current search, optionally clearing the text of the search box
+        /// </summary>
+        /// <param name="clearText">If the search box text should be cleared</param>
+        private IEnumerator ClearSearch(bool clearText)
         {
             _searchController.RestoreHiddenItems(_playerStash.Grid);
 
@@ -133,9 +152,10 @@ namespace StashSearch
             _searchController.RefreshGridView(_gridView);
             _scrollRect.normalizedPosition = Vector3.up;
 
-            // Enable user input
-            _inputField.enabled = true;
-            _inputField.text = string.Empty;
+            if (clearText)
+            {
+                _inputField.text = string.Empty;
+            }
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
 
