@@ -216,93 +216,72 @@ namespace StashSearch.Utils
         /// <returns></returns>
         private bool IsSearchedItem(Item item, string searchString)
         {
-            string[] splitSearchString = searchString.Split(',');
-            
-            if (IsSearchTermItemClass(item, splitSearchString))
-            {
-                return true;
-            }
+            string[] searchTerms = searchString.Split(',');
 
-            // Search short name first
-            var fullName = item.LocalizedName().ToLower();         
-            bool match = splitSearchString.Any(x => fullName.Contains(x.Trim(_trimChars)));
-
-            // Search full name second
-            if (!match)
+            foreach (var untrimmedSearchTerm in searchTerms)
             {
+                var searchTerm = untrimmedSearchTerm.Trim(_trimChars);
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    continue;
+                }
+
+                // check if term is an item class
+                if (IsSearchTermItemClass(item, searchTerm))
+                {
+                    return true;
+                }
+
+                // check short name
                 var shortName = item.LocalizedShortName().ToLower();
+                if (shortName.Contains(searchTerm))
+                {
+                    return true;
+                }
+                
+                // check full name 
+                var fullName = item.LocalizedName().ToLower();         
+                if (fullName.Contains(searchTerm))
+                {
+                    return true;
+                }
 
-                match = splitSearchString.Any(x => shortName.Contains(x.Trim(_trimChars)));
-            }
-
-            // No match by name, check item parent now.
-            if (!match)
-            {
+                // check item parent
                 var itemParent = item.Template._parent.ToLower();
-
-                match = splitSearchString.Any(x => itemParent.Contains(x.Trim(_trimChars)));
+                if (itemParent.Contains(searchTerm))
+                {
+                    return true;
+                }
             }
 
-            return match;
+            return false;
         }
 
         /// <summary>
         /// search term starts with @ and points to a specific item class
         /// </summary>
-        /// <param name="item"></param>
-        /// <param name="searchString"></param>
+        /// <param name="item">Item to search against</param>
+        /// <param name="searchTerm">Term to search</param>
         /// <returns></returns>
-        private bool IsSearchTermItemClass(Item item, string[] searchTerms)
+        private bool IsSearchTermItemClass(Item item, string searchTerm)
         {
-            if (searchTerms.Any(x => x.Contains("@weapon")) && item is Weapon)
-                return true;
+            // check if term begins with @
+            if (searchTerm[0] != '@')
+            {
+                return false;
+            }
 
-            if (searchTerms.Any(x => x.Contains("@magazine")) && item is MagazineClass)
-                return true;
+            // remove prepended @
+            var trimmedTerm = searchTerm.Trim('@');
 
-            if (searchTerms.Any(x => x.Contains("@ammo")) && (item is BulletClass || item is AmmoBox))
-                return true;
+            // check if this is a valid term
+            if (!ItemClasses.SearchTermMap.ContainsKey(trimmedTerm))
+            {
+                return false;
+            }
 
-            if (searchTerms.Any(x => x.Contains("@meds")) && item is MedsClass)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@food")) && item is FoodClass)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@knife")) && item is KnifeClass)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@mod")) && item is Mod)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@grenade")) && item is GrenadeClass)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@barter")) && item is GClass2704)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@rig")) && item is GClass2685)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@goggles")) && item is GogglesClass)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@container")) && (item is SearchableItemClass || item is GClass2686))
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@armor")) && item is GClass2637)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@info")) && item is GClass2738)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@keys")) && item is GClass2720)
-                return true;
-
-            if (searchTerms.Any(x => x.Contains("@fir")) && item.MarkedAsSpawnedInSession)
-                return true;
-
-            return false;
+            // return if item matches the item class condition
+            return ItemClasses.ItemClassConditionMap[ItemClasses.SearchTermMap[trimmedTerm]](item);
         }
     }
 
