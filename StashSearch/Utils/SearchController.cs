@@ -30,6 +30,7 @@ namespace StashSearch.Utils
         public HashSet<Item> Search(string searchString, StashGridClass gridToSearch, string parentGridID)
         {
             IsSearchedState = true;
+            CurrentSearchString = searchString;
             ParentGridId = parentGridID;
 
             // Set context of what grid we searched
@@ -91,6 +92,7 @@ namespace StashSearch.Utils
 
                 // Reset the search state
                 IsSearchedState = false;
+                CurrentSearchString = string.Empty;
                 SearchedGrid = null;
             }
             catch (Exception e)

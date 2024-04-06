@@ -119,13 +119,19 @@ namespace StashSearch
             // Add our listeners
 
             _inputFieldPlayer.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(SearchStash()); });
-            _searchRestoreButtonPlayer.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearStashSearch()); });
+            _searchRestoreButtonPlayer.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearStashSearch(true)); });
 
             _inputFieldTrader.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(SearchTrader()); });
-            _searchRestoreButtonTrader.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearTraderSearch()); });
+            _searchRestoreButtonTrader.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearTraderSearch(true)); });
 
             // Adjust the trader UI
             AdjustTraderUI();
+        }
+
+        private void OnDisable()
+        {
+            _inputFieldPlayer.text = string.Empty;
+            _inputFieldTrader.text = string.Empty;
         }
 
         private void Update()
@@ -148,11 +154,11 @@ namespace StashSearch
             {
                 if (SearchController.LastSearchedGrid == GridViewOwner.PlayerTradingScreen)
                 {
-                    StaticManager.BeginCoroutine(ClearStashSearch());
+                    StaticManager.BeginCoroutine(ClearStashSearch(true));
                 }
                 else if (SearchController.LastSearchedGrid == GridViewOwner.Trader)
                 {
-                    StaticManager.BeginCoroutine(ClearTraderSearch());
+                    StaticManager.BeginCoroutine(ClearTraderSearch(true));
                 }
             }
         }
@@ -177,10 +183,22 @@ namespace StashSearch
 
         private IEnumerator SearchStash()
         {
-            if (_inputFieldPlayer.text == string.Empty) yield break;
+            // clear search if one is already pending
+            if (_searchControllerPlayer.IsSearchedState)
+            {
+                // don't bother searching if term is the same as current search
+                if (_inputFieldPlayer.text == _searchControllerPlayer.CurrentSearchString) yield break;
 
-            // Disable the input, so the user can't search over a search
-            _inputFieldPlayer.enabled = false;
+                // avoid losing items if trading table not empty
+                if (!CheckTradingTableEmpty())
+                {
+                    yield break;
+                }
+
+                yield return ClearStashSearch(false);
+            }
+
+            if (_inputFieldPlayer.text == string.Empty) yield break;
 
             // Recursively search, starting at the player stash
             HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
@@ -197,15 +215,11 @@ namespace StashSearch
             yield break;
         }
 
-        private IEnumerator ClearStashSearch()
+        private IEnumerator ClearStashSearch(bool clearText)
         {
-            if (_gridViewTradingTable?.Grid?.ItemCollection != null && _gridViewTradingTable.Grid.ItemCollection.Count > 0)
+            // avoid losing items if trading table not empty
+            if (!CheckTradingTableEmpty())
             {
-                NotificationManagerClass.DisplayMessageNotification(
-                        "Cannot clear search with items in the trading table.",
-                        EFT.Communications.ENotificationDurationType.Default,
-                        EFT.Communications.ENotificationIconType.Alert);
-
                 yield break;
             }
 
@@ -215,9 +229,10 @@ namespace StashSearch
             _searchControllerPlayer.RefreshGridView(_gridViewPlayer);
             _scrollRectPlayer.normalizedPosition = Vector3.up;
 
-            // Enable user input
-            _inputFieldPlayer.enabled = true;
-            _inputFieldPlayer.text = string.Empty;
+            if (clearText)
+            {
+                _inputFieldPlayer.text = string.Empty;
+            }
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, false);
 
@@ -226,10 +241,16 @@ namespace StashSearch
 
         private IEnumerator SearchTrader()
         {
-            if (_inputFieldTrader.text == string.Empty) yield break;
+            // clear search if one is already pending
+            if (_searchControllerTrader.IsSearchedState)
+            {
+                // don't bother searching if term is the same as current search
+                if (_inputFieldTrader.text == _searchControllerTrader.CurrentSearchString) yield break;
 
-            // Disable the input, so the user can't search over a search
-            _inputFieldTrader.enabled = false;
+                yield return ClearTraderSearch(false);
+            }
+
+            if (_inputFieldTrader.text == string.Empty) yield break;
 
             // Search the trader
             HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
@@ -238,7 +259,7 @@ namespace StashSearch
             SearchController.LastSearchedGrid = GridViewOwner.Trader;
 
             // refresh the UI
-            _searchControllerPlayer.RefreshGridView(_gridViewTrader, searchResult);
+            _searchControllerTrader.RefreshGridView(_gridViewTrader, searchResult);
             _scrollRectTrader.normalizedPosition = Vector3.up;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, true);
@@ -246,21 +267,36 @@ namespace StashSearch
             yield break;
         }
 
-        private IEnumerator ClearTraderSearch()
+        private IEnumerator ClearTraderSearch(bool clearText)
         {
             _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
 
             // refresh the UI
-            _searchControllerPlayer.RefreshGridView(_gridViewTrader);
+            _searchControllerTrader.RefreshGridView(_gridViewTrader);
             _scrollRectTrader.normalizedPosition = Vector3.up;
 
-            // Enable user input
-            _inputFieldTrader.enabled = true;
-            _inputFieldTrader.text = string.Empty;
+            if (clearText)
+            {
+                _inputFieldTrader.text = string.Empty;
+            }
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewTrader, false);
 
             yield break;
+        }
+
+        private bool CheckTradingTableEmpty()
+        {
+            if (_gridViewTradingTable?.Grid?.ItemCollection != null && _gridViewTradingTable.Grid.ItemCollection.Count > 0)
+            {
+                NotificationManagerClass.DisplayMessageNotification(
+                        "Cannot clear search with items in the trading table.",
+                        EFT.Communications.ENotificationDurationType.Default,
+                        EFT.Communications.ENotificationIconType.Alert);
+                return false;
+            }
+
+            return true;
         }
     }
 }

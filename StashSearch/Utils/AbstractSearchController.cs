@@ -6,6 +6,7 @@ namespace StashSearch.Utils
     internal abstract class AbstractSearchController
     {
         public bool IsSearchedState;
+        public string CurrentSearchString;
         public bool IsTrader;
         public StashGridClass SearchedGrid;
         public string ParentGridId;
