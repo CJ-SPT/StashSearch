@@ -54,6 +54,7 @@ namespace StashSearch
             new TraderScreenGroupPatch().Enable();
             new OnScreenChangedPatch().Enable();
             new SortingTablePatch().Enable();
+            new CanQuickMoveToPatch().Enable();
         }
 
         private void Start()

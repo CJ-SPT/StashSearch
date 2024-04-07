@@ -17,7 +17,7 @@ namespace StashSearch.Patches
         /// </summary>
         /// <returns></returns>
         [PatchPrefix]
-        public static bool PatchPostfix()
+        public static bool PatchPrefix()
         {
             foreach (var controller in Plugin.SearchControllers)
             {
