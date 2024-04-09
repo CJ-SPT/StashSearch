@@ -24,12 +24,12 @@ namespace StashSearch
         private SearchController _searchController;
 
         // Search GameObject and TMP_InputField
-        private GameObject _searchObject;
+        public GameObject SearchObject;
 
         private TMP_InputField _inputField;
 
         // Button GameObject
-        private GameObject _searchRestoreButtonObject;
+        public GameObject SearchRestoreButtonObject;
 
         private Button _searchRestoreButton;
 
@@ -64,16 +64,16 @@ namespace StashSearch
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
 
             // Instantiate the prefab, set its anchor to the SimpleStashPanel
-            _searchObject = Instantiate(Plugin.PlayerSearchBoxPrefab, _simpleStash.transform);
-            _searchRestoreButtonObject = Instantiate(Plugin.SearchRestoreButtonPrefab, _simpleStash.transform);
+            SearchObject = Instantiate(Plugin.PlayerSearchBoxPrefab, _simpleStash.transform);
+            SearchRestoreButtonObject = Instantiate(Plugin.SearchRestoreButtonPrefab, _simpleStash.transform);
 
             // Adjust the rects anchored position
-            _searchObject.RectTransform().anchoredPosition = new Vector3(-52, 73);
-            _searchRestoreButtonObject.RectTransform().anchoredPosition = new Vector3(290, 73);
+            SearchObject.RectTransform().anchoredPosition = new Vector3(-52, 73);
+            SearchRestoreButtonObject.RectTransform().anchoredPosition = new Vector3(290, 73);
 
             // Add the search listener as a delegate method
-            _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();
-            _searchRestoreButton = _searchRestoreButtonObject.GetComponentInChildren<Button>();
+            _inputField = SearchObject.GetComponentInChildren<TMP_InputField>();
+            _searchRestoreButton = SearchRestoreButtonObject.GetComponentInChildren<Button>();
 
             _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
             _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch(true)); });

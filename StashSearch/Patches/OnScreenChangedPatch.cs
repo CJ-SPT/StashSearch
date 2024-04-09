@@ -1,4 +1,6 @@
 ﻿using Aki.Reflection.Patching;
+using Comfort.Common;
+using EFT;
 using EFT.UI;
 using EFT.UI.Screens;
 using HarmonyLib;
@@ -21,7 +23,13 @@ namespace StashSearch.Patches
         {
             CurrentScreen = eftScreenType;
 
-            Logger.LogDebug(eftScreenType);
+            bool stashScreenEnabled = eftScreenType == EEftScreenType.Inventory && !Singleton<GameWorld>.Instantiated;
+            bool traderScreenEnabled = eftScreenType == EEftScreenType.Trader && !Singleton<GameWorld>.Instantiated;
+
+            Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().SearchObject.SetActive(stashScreenEnabled);
+            Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().SearchRestoreButtonObject.SetActive(stashScreenEnabled);
+
+            TraderScreenGroupPatch.TraderDealGroup.GetComponent<TraderScreenComponent>().gameObject.SetActive(traderScreenEnabled);
 
             foreach (var controller in Plugin.SearchControllers)
             {

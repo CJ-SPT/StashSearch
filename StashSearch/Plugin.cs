@@ -2,7 +2,6 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using DrakiaXYZ.VersionChecker;
-using EFT;
 using EFT.UI;
 using StashSearch.Config;
 using StashSearch.Patches;
@@ -17,7 +16,7 @@ using UnityEngine;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.3")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.4")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
@@ -78,6 +77,7 @@ namespace StashSearch
                 return;
             }
 
+            /*
             if (Singleton<GameWorld>.Instantiated && _isActive)
             {
                 Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = false;
@@ -87,7 +87,7 @@ namespace StashSearch
             {
                 Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = true;
                 _isActive = true;
-            }
+            }*/
         }
 
         private void LoadBundle()
