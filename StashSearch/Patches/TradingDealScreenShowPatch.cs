@@ -2,6 +2,7 @@
 using EFT.UI;
 using HarmonyLib;
 using System.Reflection;
+
 namespace StashSearch.Patches
 {
     internal class TraderScreenGroupPatch : ModulePatch
@@ -18,8 +19,13 @@ namespace StashSearch.Patches
         [PatchPostfix]
         public static void PatchPostfix(TraderScreensGroup __instance)
         {
-            __instance.GetOrAddComponent<TraderScreenComponent>();
+            if (TraderDealGroup)
+            {
+                return;
+            }
+
             TraderDealGroup = __instance;
+            Plugin.Instance.AttachToTraderScreen(TraderDealGroup);
         }
     }
 }

@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.3")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.4")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
@@ -31,8 +31,8 @@ namespace StashSearch
         public static GameObject TraderSearchBoxPrefab;
         public static GameObject SearchRestoreButtonPrefab;
 
-        private bool _isActive = false;
-        private bool _isInstantiated = false;
+        public GameObject StashSearchGameObject;
+        public GameObject TraderSearchGameObject;
 
         internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
 
@@ -51,6 +51,7 @@ namespace StashSearch
             StashSearchConfig.InitConfig(Config);
 
             new GridViewShowPatch().Enable();
+            new InventoryScreenShowPatch().Enable();
             new TraderScreenGroupPatch().Enable();
             new OnScreenChangedPatch().Enable();
             new SortingTablePatch().Enable();
@@ -62,32 +63,20 @@ namespace StashSearch
             LoadBundle();
         }
 
-        public void Update()
+        public void AttachToInventoryScreen(InventoryScreen inventory)
         {
-            if (Singleton<CommonUI>.Instantiated && !_isActive && !_isInstantiated)
-            {
-                var inventoryScreen = Singleton<CommonUI>.Instance.InventoryScreen;
-                inventoryScreen.GetOrAddComponent<StashComponent>();
+            // create a new gameobject parented under InventoryScreen with our component on it
+            StashSearchGameObject = new GameObject("StashSearch");
+            StashSearchGameObject.transform.SetParent(inventory.transform);
+            StashSearchGameObject.GetOrAddComponent<StashComponent>();
+        }
 
-                _isActive = true;
-                _isInstantiated = true;
-            }
-
-            if (!_isInstantiated)
-            {
-                return;
-            }
-
-            if (Singleton<GameWorld>.Instantiated && _isActive)
-            {
-                Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = false;
-                _isActive = false;
-            }
-            else if (!Singleton<GameWorld>.Instantiated && !_isActive)
-            {
-                Singleton<CommonUI>.Instance.InventoryScreen.GetComponent<StashComponent>().enabled = true;
-                _isActive = true;
-            }
+        public void AttachToTraderScreen(TraderScreensGroup traderScreensGroup)
+        {
+            // create a new gameobject parented under TraderScreensGroup with our component on it
+            TraderSearchGameObject = new GameObject("TraderSearch");
+            TraderSearchGameObject.transform.SetParent(traderScreensGroup.transform);
+            TraderSearchGameObject.GetOrAddComponent<TraderScreenComponent>();
         }
 
         private void LoadBundle()
