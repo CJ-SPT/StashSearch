@@ -66,17 +66,15 @@ namespace StashSearch
         public void AttachToInventoryScreen(InventoryScreen inventory)
         {
             // create a new gameobject parented under InventoryScreen with our component on it
-            StashSearchGameObject = new GameObject("StashSearch");
+            StashSearchGameObject = new GameObject("StashSearch", typeof(StashComponent));
             StashSearchGameObject.transform.SetParent(inventory.transform);
-            StashSearchGameObject.GetOrAddComponent<StashComponent>();
         }
 
         public void AttachToTraderScreen(TraderScreensGroup traderScreensGroup)
         {
             // create a new gameobject parented under TraderScreensGroup with our component on it
-            TraderSearchGameObject = new GameObject("TraderSearch");
+            TraderSearchGameObject = new GameObject("TraderSearch", typeof(TraderScreenComponent));
             TraderSearchGameObject.transform.SetParent(traderScreensGroup.transform);
-            TraderSearchGameObject.GetOrAddComponent<TraderScreenComponent>();
         }
 
         private void LoadBundle()
