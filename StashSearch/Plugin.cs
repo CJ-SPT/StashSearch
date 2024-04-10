@@ -1,8 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using Comfort.Common;
 using DrakiaXYZ.VersionChecker;
-using EFT;
 using EFT.UI;
 using StashSearch.Config;
 using StashSearch.Patches;
@@ -17,7 +15,7 @@ using UnityEngine;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.4")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.0.5")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
