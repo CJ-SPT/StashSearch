@@ -64,7 +64,7 @@ namespace StashSearch
         {
         }
 
-        private void Start()
+        private void Awake()
         {
             _traderDealGroup = TraderScreenGroupPatch.TraderDealGroup;
             _traderDealScreen = (TraderDealScreen)AccessTools.Field(typeof(TraderScreensGroup), "_traderDealScreen").GetValue(_traderDealGroup);
@@ -117,7 +117,6 @@ namespace StashSearch
             Plugin.SearchControllers.Add(_searchControllerTrader);
 
             // Add our listeners
-
             _inputFieldPlayer.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(SearchStash()); });
             _searchRestoreButtonPlayer.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearStashSearch(true)); });
 
@@ -132,6 +131,8 @@ namespace StashSearch
         {
             _inputFieldPlayer.text = string.Empty;
             _inputFieldTrader.text = string.Empty;
+
+            // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch do it
         }
 
         private void Update()
