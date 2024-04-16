@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using EFT.InventoryLogic;
 using TMPro;
 using UnityEngine;
 
@@ -12,11 +12,9 @@ namespace StashSearch.Utils
     {
         private TMP_InputField _inputField;
         private char[] _trimChars = [' ', ',', '.', '/', '\\'];
+        private char[] _ignoreCharacters = ['(', ')', '[', ']', '"', '\''];
         private string _lastSearch;
         private string _lastSuggested;
-        private int _forceCaret;
-        private int _forceSelection;
-        private bool _shouldForceSelect;
 
         private Dictionary<string, int> _searchKeywords = new();
 
@@ -28,20 +26,10 @@ namespace StashSearch.Utils
         {
             _inputField = gameObject.GetComponentInChildren<TMP_InputField>();
             _inputField.onValueChanged.AddListener(OnInputValueChanged);
-            _inputField.onEndEdit.AddListener(delegate { _lastSearch = string.Empty; _lastSuggested = string.Empty; });
-        }
-
-        private void LateUpdate()
-        {
-            if (_shouldForceSelect)
-            {
-                _inputField.caretPosition = _forceCaret;
-                _inputField.selectionAnchorPosition = _forceCaret;
-                _inputField.selectionFocusPosition = _forceSelection;
-                _inputField.ForceLabelUpdate();
-
-                _shouldForceSelect = false;
-            }
+            _inputField.onEndEdit.AddListener(delegate {
+                    _lastSearch = string.Empty;
+                    _lastSuggested = string.Empty;
+            });
         }
 
         private void OnInputValueChanged(string thisSearch)
@@ -75,15 +63,20 @@ namespace StashSearch.Utils
             }
 
             // save our caret position for later, before setting text, which will modify it
-            _forceCaret = thisSearch.Length;
+            var caretPos = thisSearch.Length;
 
             // set our text to contain the auto complete text
             _lastSuggested = thisSearch + autoCompleteSuffix;
             _inputField.text = thisSearch + autoCompleteSuffix;
 
-            // force a refresh on next frame, since this will not work on the same frame for whatever reason
-            _forceSelection = _forceCaret + autoCompleteSuffix.Length;
-            _shouldForceSelect = true;
+            // force a refresh on next frame, since this will not work on the same frame
+            // use this bizzare bsg extention method that just adds a coroutine with our closure
+            _inputField.WaitOneFrame(() => {
+                _inputField.caretPosition = caretPos;
+                _inputField.selectionAnchorPosition = caretPos;
+                _inputField.selectionFocusPosition = caretPos + autoCompleteSuffix.Length;
+                _inputField.ForceLabelUpdate();
+            });
 
             Plugin.Log.LogDebug($"search: {thisSearch} autocomplete: {autoCompleteSuffix}");
         }
@@ -97,51 +90,80 @@ namespace StashSearch.Utils
                 return string.Empty;
             }
 
-            // return the most likely one
+            // get the match with the largest count
             var bestMatch = matches.OrderByDescending(keywordPair => keywordPair.Value).First().Key;
 
-            // remove the first occurance of prefix
+            // remove the prefix to return the suffix
             return bestMatch.Remove(bestMatch.IndexOf(searchPrefix), searchPrefix.Length);
         }
 
-        public void ParseKeywordsFromGrid(StashGridClass gridToParse)
+        public void AddKeyword(string keyword)
         {
-            _searchKeywords.Clear();
-
-            AddItemClassKeywords();
-
-            // Recursively parse this grid, adding possible keywords
-            ParseKeywordsFromGridHelper(gridToParse);
-        }
-
-        private void AddItemClassKeywords()
-        {
-            foreach (var keyword in ItemClasses.SearchTermMap.Keys)
+            if (!_searchKeywords.ContainsKey(keyword))
             {
-                _searchKeywords["@" + keyword] = 1;
+                _searchKeywords[keyword] = 1;
+            }
+            else
+            {
+                _searchKeywords[keyword] = _searchKeywords[keyword] + 1;
             }
         }
 
-        private void ParseKeywordsFromGridHelper(StashGridClass gridToParse) 
+        public void AddKeywords(IEnumerable<string> keywords)
+        {
+            foreach (var keyword in keywords)
+            {
+                AddKeyword(keyword);
+            }
+        }
+
+        public void SplitStringAndAddToKeywords(string toBeSplit)
+        {
+            string[] splitString = toBeSplit.Split(' ');
+
+            foreach (var untrimmedKeyword in splitString)
+            {
+                // trim the ends and then remove the ignore characters from the string
+                var keyword = untrimmedKeyword.Trim(_trimChars);
+                foreach (var ignoreCharacter in _ignoreCharacters)
+                {
+                    if (keyword.Contains(ignoreCharacter))
+                    {
+                        keyword = keyword.Replace($"{ignoreCharacter}", "");
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(keyword))
+                {
+                    continue;
+                }
+
+                AddKeyword(keyword);
+            }
+        }
+
+        public void AddItemToKeywords(Item item)
+        {
+            // add all of the possible auto completes for this item
+            SplitStringAndAddToKeywords(item.LocalizedShortName().ToLower());
+            SplitStringAndAddToKeywords(item.LocalizedName().ToLower());
+        }
+
+        public void AddGridToKeywords(StashGridClass gridToParse) 
         {
             try
             { 
                 // Iterate over all child items on the grid
-                foreach (var gridItem in gridToParse.ContainedItems.ToArray())
+                foreach (var (item, _) in gridToParse.ContainedItems.ToArray())
                 {
-                    var item = gridItem.Key;
+                    AddItemToKeywords(item);
 
-                    // add all of the possible auto completes for this word
-                    SplitStringAndAddToKeywords(item.LocalizedShortName().ToLower());
-                    SplitStringAndAddToKeywords(item.LocalizedName().ToLower());
-                    SplitStringAndAddToKeywords(item.Template._parent.ToLower());
-
-                    if (gridItem.Key is LootItemClass lootItem && lootItem.Grids.Length > 0)
+                    if (item is LootItemClass lootItem && lootItem.Grids.Length > 0)
                     {
                         // Iterate over all grids on the item, and recursively call the ParseKeywordsHelper method
                         foreach (var subGrid in lootItem.Grids)
                         {
-                            ParseKeywordsFromGridHelper(subGrid);
+                            AddGridToKeywords(subGrid);
                         }
                     }
                 }
@@ -152,27 +174,10 @@ namespace StashSearch.Utils
             }
         }
 
-        private void SplitStringAndAddToKeywords(string str)
+        public void ClearKeywords()
         {
-            string[] splitString = str.Split(' ');
-
-            foreach (var untrimmedKeyword in splitString)
-            {
-                var keyword = untrimmedKeyword.Trim(_trimChars);
-                if (string.IsNullOrWhiteSpace(keyword))
-                {
-                    continue;
-                }
-
-                if (!_searchKeywords.ContainsKey(keyword))
-                {
-                    _searchKeywords[keyword] = 1;
-                }
-                else
-                {
-                    _searchKeywords[keyword] = _searchKeywords[keyword] + 1;
-                }
-            }
+            _searchKeywords.Clear();
         }
+
     }
 }
