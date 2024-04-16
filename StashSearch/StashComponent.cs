@@ -23,6 +23,8 @@ namespace StashSearch
 
         private SearchController _searchController;
 
+        private AutoCompleteComponent _autoCompleteComponent;
+
         // Search GameObject and TMP_InputField
         private GameObject _searchObject;
 
@@ -80,6 +82,8 @@ namespace StashSearch
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
+
+            _autoCompleteComponent = _searchObject.AddComponent<AutoCompleteComponent>();
         }
 
         private void OnEnable()
@@ -101,6 +105,8 @@ namespace StashSearch
             _complexStash.RectTransform.sizeDelta = new Vector2(680, -260);
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
             _hasMovedComplexStash = true;
+
+            _autoCompleteComponent.ParseKeywordsFromGrid(_playerStash.Grid);
         }
 
         private void OnDisable()
