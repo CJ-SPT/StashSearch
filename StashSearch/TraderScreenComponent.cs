@@ -19,6 +19,7 @@ namespace StashSearch
     {
         private TraderScreensGroup _traderDealGroup;
         private TraderDealScreen _traderDealScreen;
+        private TraderClass _lastTrader;
 
         // "Left Player" and "Right Player" stash transforms
         private RectTransform _rectTransformTrader;
@@ -66,7 +67,7 @@ namespace StashSearch
 
         private void Awake()
         {
-            _traderDealGroup = TraderScreenGroupPatch.TraderDealGroup;
+            _traderDealGroup = TraderScreensGroupShowPatch.TraderScreensGroup;
             _traderDealScreen = (TraderDealScreen)AccessTools.Field(typeof(TraderScreensGroup), "_traderDealScreen").GetValue(_traderDealGroup);
 
             _scrollRectPlayer = (ScrollRect)AccessTools.Field(typeof(TraderDealScreen), "_stashScroll").GetValue(_traderDealScreen);
@@ -129,8 +130,10 @@ namespace StashSearch
 
         private void OnDisable()
         {
+            // clear search field and _lastTrader
             _inputFieldPlayer.text = string.Empty;
             _inputFieldTrader.text = string.Empty;
+            _lastTrader = null;
 
             // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch do it
         }
@@ -162,6 +165,20 @@ namespace StashSearch
                     StaticManager.BeginCoroutine(ClearTraderSearch(true));
                 }
             }
+        }
+
+        public void MaybeChangeTrader(TraderClass trader)
+        {
+            // clear search after trader changes
+            if (_searchControllerTrader.IsSearchedState && _lastTrader != trader)
+            {
+                _inputFieldTrader.text = string.Empty;
+
+                // HACK: clear the current search string to allow repeat search without going through normal clear
+                _searchControllerTrader.CurrentSearchString = string.Empty;
+            }
+
+            _lastTrader = trader;
         }
 
         private void AdjustTraderUI()

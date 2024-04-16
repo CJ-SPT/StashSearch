@@ -5,9 +5,9 @@ using System.Reflection;
 
 namespace StashSearch.Patches
 {
-    internal class TraderScreenGroupPatch : ModulePatch
+    internal class TraderScreensGroupShowPatch : ModulePatch
     {
-        public static TraderScreensGroup TraderDealGroup;
+        public static TraderScreensGroup TraderScreensGroup;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -19,13 +19,16 @@ namespace StashSearch.Patches
         [PatchPostfix]
         public static void PatchPostfix(TraderScreensGroup __instance)
         {
-            if (TraderDealGroup)
+            if (TraderScreensGroup)
             {
                 return;
             }
 
-            TraderDealGroup = __instance;
-            Plugin.Instance.AttachToTraderScreen(TraderDealGroup);
+            TraderScreensGroup = __instance;
+            var traderSearchGO = Plugin.Instance.AttachToTraderScreen(TraderScreensGroup);
+
+            // save component to the other patch
+            TraderDealScreenShowPatch.TraderScreenComponent = traderSearchGO.GetComponent<TraderScreenComponent>();
         }
     }
 }
