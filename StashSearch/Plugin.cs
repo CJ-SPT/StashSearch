@@ -50,7 +50,8 @@ namespace StashSearch
 
             new GridViewShowPatch().Enable();
             new InventoryScreenShowPatch().Enable();
-            new TraderScreenGroupPatch().Enable();
+            new TraderScreensGroupShowPatch().Enable();
+            new TraderDealScreenShowPatch().Enable();
             new OnScreenChangedPatch().Enable();
             new SortingTablePatch().Enable();
             new CanQuickMoveToPatch().Enable();
@@ -61,18 +62,20 @@ namespace StashSearch
             LoadBundle();
         }
 
-        public void AttachToInventoryScreen(InventoryScreen inventory)
+        public GameObject AttachToInventoryScreen(InventoryScreen inventory)
         {
             // create a new gameobject parented under InventoryScreen with our component on it
             StashSearchGameObject = new GameObject("StashSearch", typeof(StashComponent));
             StashSearchGameObject.transform.SetParent(inventory.transform);
+            return StashSearchGameObject;
         }
 
-        public void AttachToTraderScreen(TraderScreensGroup traderScreensGroup)
+        public GameObject AttachToTraderScreen(TraderScreensGroup traderScreensGroup)
         {
             // create a new gameobject parented under TraderScreensGroup with our component on it
             TraderSearchGameObject = new GameObject("TraderSearch", typeof(TraderScreenComponent));
             TraderSearchGameObject.transform.SetParent(traderScreensGroup.transform);
+            return TraderSearchGameObject;
         }
 
         private void LoadBundle()
