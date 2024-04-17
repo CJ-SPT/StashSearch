@@ -87,7 +87,9 @@ namespace StashSearch
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
 
+            // add autocomplete and populate autocomplete onselect
             _autoCompleteComponent = _searchObject.AddComponent<AutoCompleteComponent>();
+            _inputField.onSelect.AddListener((_) => PopulateAutoComplete());
         }
 
         private void OnEnable()
@@ -110,8 +112,6 @@ namespace StashSearch
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
             _hasMovedComplexStash = true;
 
-            // populate autocomplete each time that the search is selected
-            _inputField.onSelect.AddListener((_) => PopulateAutoComplete());
         }
 
         private void OnDisable()
