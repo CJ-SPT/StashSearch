@@ -9,8 +9,10 @@ using HarmonyLib;
 using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +24,10 @@ namespace StashSearch
         private CommonUI _commonUI => Singleton<CommonUI>.Instance;
 
         private SearchController _searchController;
+
+        private InputFieldAutoComplete _autoCompleteComponent;
+        private DateTime _lastAutoCompleteFill = DateTime.MinValue;
+        private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
 
         // Search GameObject and TMP_InputField
         private GameObject _searchObject;
@@ -80,6 +86,10 @@ namespace StashSearch
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
+
+            // add autocomplete and populate autocomplete onselect
+            _autoCompleteComponent = new(_inputField);
+            _inputField.onSelect.AddListener((_) => PopulateAutoComplete());
         }
 
         private void OnEnable()
@@ -101,6 +111,7 @@ namespace StashSearch
             _complexStash.RectTransform.sizeDelta = new Vector2(680, -260);
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
             _hasMovedComplexStash = true;
+
         }
 
         private void OnDisable()
@@ -127,6 +138,9 @@ namespace StashSearch
         {
             if (StashSearchConfig.FocusSearch.Value.IsDown() && OnScreenChangedPatch.CurrentScreen == EEftScreenType.Inventory)
             {
+                // for some reason, ActivateInputField doesn't call any event
+                PopulateAutoComplete();
+
                 _inputField.ActivateInputField();
 
                 // highlight text inside if not empty
@@ -199,6 +213,29 @@ namespace StashSearch
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
 
             yield break;
+        }
+
+
+        private void PopulateAutoComplete()
+        {
+            // don't populate if searching
+            if (_searchController.IsSearchedState)
+            {
+                return;
+            }
+
+            // throttle this calculation
+            var timeDiff = DateTime.UtcNow - _lastAutoCompleteFill;
+            if (timeDiff <= _autoCompleteThrottleTime)
+            {
+                return;
+            }
+            _lastAutoCompleteFill = DateTime.UtcNow;
+
+            // clear and add keywords from itemclasses and stash items
+            _autoCompleteComponent.ClearKeywords();
+            _autoCompleteComponent.AddKeywords(ItemClasses.SearchTermMap.Keys.Select(x => "@" + x));
+            _autoCompleteComponent.AddGridToKeywords(_playerStash.Grid);
         }
     }
 }

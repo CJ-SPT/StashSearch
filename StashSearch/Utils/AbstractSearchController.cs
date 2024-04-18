@@ -7,7 +7,6 @@ namespace StashSearch.Utils
     {
         public bool IsSearchedState;
         public string CurrentSearchString;
-        public bool IsTrader;
         public StashGridClass SearchedGrid;
         public string ParentGridId;
 
