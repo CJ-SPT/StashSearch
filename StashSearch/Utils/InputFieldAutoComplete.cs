@@ -1,16 +1,13 @@
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
-using EFT.Hideout;
 using EFT.InventoryLogic;
 using TMPro;
-using UnityEngine;
 
 namespace StashSearch.Utils
 {
-    public class AutoCompleteComponent : MonoBehaviour
+    public class InputFieldAutoComplete
     {
         private TMP_InputField _inputField;
 
@@ -23,13 +20,10 @@ namespace StashSearch.Utils
 
         private Dictionary<string, int> _searchKeywords = new();
 
-        public AutoCompleteComponent() 
+        public InputFieldAutoComplete(TMP_InputField inputField) 
         {
-        }
+            _inputField = inputField;
 
-        private void Awake()
-        {
-            _inputField = gameObject.GetComponentInChildren<TMP_InputField>();
             _inputField.onValueChanged.AddListener(OnInputValueChanged);
             _inputField.onEndEdit.AddListener(delegate {
                     _lastSearch = string.Empty;

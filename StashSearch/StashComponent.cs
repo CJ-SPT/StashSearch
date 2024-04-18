@@ -25,7 +25,7 @@ namespace StashSearch
 
         private SearchController _searchController;
 
-        private AutoCompleteComponent _autoCompleteComponent;
+        private InputFieldAutoComplete _autoCompleteComponent;
         private DateTime _lastAutoCompleteFill = DateTime.MinValue;
         private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
 
@@ -88,7 +88,7 @@ namespace StashSearch
             Plugin.SearchControllers.Add(_searchController);
 
             // add autocomplete and populate autocomplete onselect
-            _autoCompleteComponent = _searchObject.AddComponent<AutoCompleteComponent>();
+            _autoCompleteComponent = new(_inputField);
             _inputField.onSelect.AddListener((_) => PopulateAutoComplete());
         }
 
@@ -225,12 +225,12 @@ namespace StashSearch
             }
 
             // throttle this calculation
-            var timeDiff = DateTime.Now - _lastAutoCompleteFill;
+            var timeDiff = DateTime.UtcNow - _lastAutoCompleteFill;
             if (timeDiff <= _autoCompleteThrottleTime)
             {
                 return;
             }
-            _lastAutoCompleteFill = DateTime.Now;
+            _lastAutoCompleteFill = DateTime.UtcNow;
 
             // clear and add keywords from itemclasses and stash items
             _autoCompleteComponent.ClearKeywords();

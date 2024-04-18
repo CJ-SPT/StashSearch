@@ -63,9 +63,9 @@ namespace StashSearch
 
         // autocomplete
         private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
-        private AutoCompleteComponent _autoCompleteTrader;
+        private InputFieldAutoComplete _autoCompleteTrader;
         private DateTime _lastAutoCompleteFillTrader = DateTime.MinValue;
-        private AutoCompleteComponent _autoCompletePlayer;
+        private InputFieldAutoComplete _autoCompletePlayer;
         private DateTime _lastAutoCompleteFillPlayer = DateTime.MinValue;
 
         private bool _isPlayerGridFocused = false;
@@ -137,10 +137,10 @@ namespace StashSearch
             AdjustTraderUI();
 
             // add autocomplete and populate autocomplete onselect
-            _autoCompletePlayer = _searchBoxObjectPlayer.AddComponent<AutoCompleteComponent>();
+            _autoCompletePlayer = new(_inputFieldPlayer);
             _inputFieldPlayer.onSelect.AddListener((_) => PopulateAutoComplete(_autoCompletePlayer, _gridViewPlayer.Grid, _searchControllerPlayer, ref _lastAutoCompleteFillPlayer));
 
-            _autoCompleteTrader = _searchBoxObjectTrader.AddComponent<AutoCompleteComponent>();
+            _autoCompleteTrader = new(_inputFieldTrader);
             _inputFieldTrader.onSelect.AddListener((_) => PopulateAutoComplete(_autoCompleteTrader, _gridViewTrader.Grid, _searchControllerTrader, ref _lastAutoCompleteFillTrader));
         }
 
@@ -342,7 +342,7 @@ namespace StashSearch
             return true;
         }
 
-        private void PopulateAutoComplete(AutoCompleteComponent autoComplete, StashGridClass grid, SearchController searchController, ref DateTime lastFill)
+        private void PopulateAutoComplete(InputFieldAutoComplete autoComplete, StashGridClass grid, SearchController searchController, ref DateTime lastFill)
         {
             // don't populate if searching
             if (searchController.IsSearchedState)
@@ -351,12 +351,12 @@ namespace StashSearch
             }
 
             // throttle this calculation
-            var timeDiff = DateTime.Now - lastFill;
+            var timeDiff = DateTime.UtcNow - lastFill;
             if (timeDiff <= _autoCompleteThrottleTime)
             {
                 return;
             }
-            lastFill = DateTime.Now;
+            lastFill = DateTime.UtcNow;
 
             // clear and add keywords from itemclasses and stash items
             autoComplete.ClearKeywords();
