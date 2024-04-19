@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using System.Collections;
+using EFT.UI;
 
 namespace StashSearch.Utils
 {
@@ -55,6 +57,7 @@ namespace StashSearch.Utils
             Plugin.Log.LogDebug($"Found {_itemsToReshowAfterSearch.Count()} results in search");
 
             MoveSearchedItems();
+            CloseHiddenGridWindows();
 
             return _itemsToReshowAfterSearch;
         }
@@ -282,6 +285,43 @@ namespace StashSearch.Utils
 
             // return if item matches the item class condition
             return ItemClasses.ItemClassConditionMap[ItemClasses.SearchTermMap[trimmedTerm]](item);
+        }
+
+        private void CloseHiddenGridWindows()
+        {
+            Dictionary<string, GridWindow> gridWindows = new();
+
+            // find all open gridWindows and associate them with their item id
+            var openWindowList = Plugin.WindowListField.GetValue(ItemUiContext.Instance) as IList;
+            foreach (var windowEntry in openWindowList)
+            {
+                var window = Plugin.WindowContainerWindowField.GetValue(windowEntry);
+                if (window.GetType() != typeof(GridWindow))
+                {
+                    continue;
+                }
+        
+                GridWindow gridWindow = (GridWindow)window;
+                var lootItem = Plugin.WindowLootItemField.GetValue(gridWindow) as LootItemClass;
+                gridWindows.Add(lootItem.Id, gridWindow);
+            }
+
+            // close all windows that are from hidden items
+            foreach (var containerItem in itemsToRestore)
+            {
+                // check if item in search results, we don't want to close in that case
+                if (_itemsToReshowAfterSearch.Any(searchedItem => searchedItem.Id == containerItem.Item.Id))
+                {
+                    continue;
+                }
+
+                // item is hidden, check if it's currently open in a gridwindow
+                if (gridWindows.ContainsKey(containerItem.Item.Id))
+                {
+                    gridWindows[containerItem.Item.Id].Close();
+                    gridWindows.Remove(containerItem.Item.Id);
+                }
+            }
         }
     }
 
