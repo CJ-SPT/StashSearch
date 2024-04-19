@@ -6,6 +6,7 @@ using EFT.UI.DragAndDrop;
 using HarmonyLib;
 using System.Collections;
 using EFT.UI;
+using System.Reflection;
 
 namespace StashSearch.Utils
 {
@@ -17,6 +18,11 @@ namespace StashSearch.Utils
         /// This is a collection of items we want to show as soon as the search is complete.
         /// </summary>
         private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
+
+        // access to open windows to be able to close them
+        private static FieldInfo _windowListField = AccessTools.Field(typeof(ItemUiContext), "list_0");
+        private static FieldInfo _windowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(LootItemClass));
+        private static FieldInfo _windowContainerWindowField = AccessTools.Field(AccessTools.FirstInner(typeof(ItemUiContext), x => x.GetField("WindowType") != null), "Window");
 
         private char[] _trimChars = [' ', ',', '.', '/', '\\'];
 
@@ -292,17 +298,17 @@ namespace StashSearch.Utils
             Dictionary<string, GridWindow> gridWindows = new();
 
             // find all open gridWindows and associate them with their item id
-            var openWindowList = Plugin.WindowListField.GetValue(ItemUiContext.Instance) as IList;
+            var openWindowList = _windowListField.GetValue(ItemUiContext.Instance) as IList;
             foreach (var windowEntry in openWindowList)
             {
-                var window = Plugin.WindowContainerWindowField.GetValue(windowEntry);
+                var window = _windowContainerWindowField.GetValue(windowEntry);
                 if (window.GetType() != typeof(GridWindow))
                 {
                     continue;
                 }
         
                 GridWindow gridWindow = (GridWindow)window;
-                var lootItem = Plugin.WindowLootItemField.GetValue(gridWindow) as LootItemClass;
+                var lootItem = _windowLootItemField.GetValue(gridWindow) as LootItemClass;
                 gridWindows.Add(lootItem.Id, gridWindow);
             }
 

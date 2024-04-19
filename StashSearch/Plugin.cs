@@ -2,14 +2,12 @@
 using BepInEx.Logging;
 using DrakiaXYZ.VersionChecker;
 using EFT.UI;
-using HarmonyLib;
 using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
@@ -36,10 +34,6 @@ namespace StashSearch
 
         internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
 
-        public static FieldInfo WindowListField;
-        public static FieldInfo WindowLootItemField;
-        public static FieldInfo WindowContainerWindowField;
-
         internal void Awake()
         {
             if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
@@ -61,12 +55,6 @@ namespace StashSearch
             new OnScreenChangedPatch().Enable();
             new SortingTablePatch().Enable();
             new CanQuickMoveToPatch().Enable();
-
-            WindowListField = AccessTools.Field(typeof(ItemUiContext), "list_0");
-            WindowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(LootItemClass));
-
-            Type windowContainerType = AccessTools.FirstInner(typeof(ItemUiContext), x => x.GetField("WindowType") != null);
-            WindowContainerWindowField = AccessTools.Field(windowContainerType, "Window");
         }
 
         private void Start()
