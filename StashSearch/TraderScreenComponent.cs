@@ -7,8 +7,10 @@ using HarmonyLib;
 using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Utils;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -58,6 +60,13 @@ namespace StashSearch
 
         private ScrollRect _scrollRectPlayer;
         private ScrollRect _scrollRectTrader;
+
+        // autocomplete
+        private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
+        private InputFieldAutoComplete _autoCompleteTrader;
+        private DateTime _lastAutoCompleteFillTrader = DateTime.MinValue;
+        private InputFieldAutoComplete _autoCompletePlayer;
+        private DateTime _lastAutoCompleteFillPlayer = DateTime.MinValue;
 
         private bool _isPlayerGridFocused = false;
 
@@ -126,6 +135,13 @@ namespace StashSearch
 
             // Adjust the trader UI
             AdjustTraderUI();
+
+            // add autocomplete and populate autocomplete onselect
+            _autoCompletePlayer = new(_inputFieldPlayer);
+            _inputFieldPlayer.onSelect.AddListener((_) => PopulateAutoComplete(_autoCompletePlayer, _gridViewPlayer.Grid, _searchControllerPlayer, ref _lastAutoCompleteFillPlayer));
+
+            _autoCompleteTrader = new(_inputFieldTrader);
+            _inputFieldTrader.onSelect.AddListener((_) => PopulateAutoComplete(_autoCompleteTrader, _gridViewTrader.Grid, _searchControllerTrader, ref _lastAutoCompleteFillTrader));
         }
 
         private void OnDisable()
@@ -144,11 +160,17 @@ namespace StashSearch
             {
                 if (_isPlayerGridFocused)
                 {
+                    // for some reason, ActivateInputField doesn't call any event
+                    PopulateAutoComplete(_autoCompleteTrader, _gridViewTrader.Grid, _searchControllerTrader, ref _lastAutoCompleteFillTrader);
+
                     _inputFieldTrader.ActivateInputField();
                     _isPlayerGridFocused = false;
                 }
                 else
                 {
+                    // for some reason, ActivateInputField doesn't call any event
+                    PopulateAutoComplete(_autoCompletePlayer, _gridViewPlayer.Grid, _searchControllerPlayer, ref _lastAutoCompleteFillPlayer);
+
                     _inputFieldPlayer.ActivateInputField();
                     _isPlayerGridFocused = true;
                 }
@@ -167,15 +189,18 @@ namespace StashSearch
             }
         }
 
-        public void MaybeChangeTrader(TraderClass trader)
+        public void MaybeChangingTrader(TraderClass trader)
         {
-            // clear search after trader changes
+            // clear search before trader changes
             if (_searchControllerTrader.IsSearchedState && _lastTrader != trader)
             {
                 _inputFieldTrader.text = string.Empty;
 
-                // HACK: clear the current search string to allow repeat search without going through normal clear
-                _searchControllerTrader.CurrentSearchString = string.Empty;
+                // HACK: clear the current search when trader is about to change 
+                _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
+
+                // reset the autocomplete throttle
+                _lastAutoCompleteFillTrader = DateTime.MinValue;
             }
 
             _lastTrader = trader;
@@ -315,6 +340,28 @@ namespace StashSearch
             }
 
             return true;
+        }
+
+        private void PopulateAutoComplete(InputFieldAutoComplete autoComplete, StashGridClass grid, SearchController searchController, ref DateTime lastFill)
+        {
+            // don't populate if searching
+            if (searchController.IsSearchedState)
+            {
+                return;
+            }
+
+            // throttle this calculation
+            var timeDiff = DateTime.UtcNow - lastFill;
+            if (timeDiff <= _autoCompleteThrottleTime)
+            {
+                return;
+            }
+            lastFill = DateTime.UtcNow;
+
+            // clear and add keywords from itemclasses and stash items
+            autoComplete.ClearKeywords();
+            autoComplete.AddKeywords(ItemClasses.SearchTermMap.Keys.Select(x => "@" + x));
+            autoComplete.AddGridToKeywords(grid);
         }
     }
 }

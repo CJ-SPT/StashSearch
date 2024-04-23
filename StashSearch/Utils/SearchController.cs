@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using System.Collections;
+using EFT.UI;
+using System.Reflection;
 
 namespace StashSearch.Utils
 {
@@ -15,6 +18,11 @@ namespace StashSearch.Utils
         /// This is a collection of items we want to show as soon as the search is complete.
         /// </summary>
         private HashSet<Item> _itemsToReshowAfterSearch = new HashSet<Item>();
+
+        // access to open windows to be able to close them
+        private static FieldInfo _windowListField = AccessTools.Field(typeof(ItemUiContext), "list_0");
+        private static FieldInfo _windowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(LootItemClass));
+        private static FieldInfo _windowContainerWindowField = AccessTools.Field(AccessTools.FirstInner(typeof(ItemUiContext), x => x.GetField("WindowType") != null), "Window");
 
         private char[] _trimChars = [' ', ',', '.', '/', '\\'];
 
@@ -55,6 +63,7 @@ namespace StashSearch.Utils
             Plugin.Log.LogDebug($"Found {_itemsToReshowAfterSearch.Count()} results in search");
 
             MoveSearchedItems();
+            CloseHiddenGridWindows();
 
             return _itemsToReshowAfterSearch;
         }
@@ -282,6 +291,43 @@ namespace StashSearch.Utils
 
             // return if item matches the item class condition
             return ItemClasses.ItemClassConditionMap[ItemClasses.SearchTermMap[trimmedTerm]](item);
+        }
+
+        private void CloseHiddenGridWindows()
+        {
+            Dictionary<string, GridWindow> gridWindows = new();
+
+            // find all open gridWindows and associate them with their item id
+            var openWindowList = _windowListField.GetValue(ItemUiContext.Instance) as IList;
+            foreach (var windowEntry in openWindowList)
+            {
+                var window = _windowContainerWindowField.GetValue(windowEntry);
+                if (window.GetType() != typeof(GridWindow))
+                {
+                    continue;
+                }
+        
+                GridWindow gridWindow = (GridWindow)window;
+                var lootItem = _windowLootItemField.GetValue(gridWindow) as LootItemClass;
+                gridWindows.Add(lootItem.Id, gridWindow);
+            }
+
+            // close all windows that are from hidden items
+            foreach (var containerItem in itemsToRestore)
+            {
+                // check if item in search results, we don't want to close in that case
+                if (_itemsToReshowAfterSearch.Any(searchedItem => searchedItem.Id == containerItem.Item.Id))
+                {
+                    continue;
+                }
+
+                // item is hidden, check if it's currently open in a gridwindow
+                if (gridWindows.ContainsKey(containerItem.Item.Id))
+                {
+                    gridWindows[containerItem.Item.Id].Close();
+                    gridWindows.Remove(containerItem.Item.Id);
+                }
+            }
         }
     }
 

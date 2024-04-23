@@ -16,15 +16,15 @@ namespace StashSearch.Patches
                 && x.GetParameters()[0].Name == "trader");
         }
 
-        [PatchPostfix]
-        public static void PatchPostfix(TraderClass trader)
+        [PatchPrefix]
+        public static void PatchPrefix(TraderClass trader)
         {
             if (!TraderScreenComponent)
             {
                 return;
             }
 
-            TraderScreenComponent.MaybeChangeTrader(trader);
+            TraderScreenComponent.MaybeChangingTrader(trader);
         }
     }
 }
