@@ -104,7 +104,7 @@ namespace StashSearch.Utils
 
             // get the match with the largest count, then the shortest autocomplete
             var bestMatch = matches.OrderByDescending(keywordPair => keywordPair.Value)
-                                   .ThenByDescending(keywordPair => keywordPair.Key.Length)
+                                   .ThenBy(keywordPair => keywordPair.Key.Length)
                                    .First().Key;
 
             // remove the prefix to return the suffix
