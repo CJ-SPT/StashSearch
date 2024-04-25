@@ -10,7 +10,6 @@ using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Utils;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -19,7 +18,7 @@ using UnityEngine.UI;
 
 namespace StashSearch
 {
-    internal class StashComponent : MonoBehaviour
+    public class StashComponent : MonoBehaviour
     {
         private CommonUI _commonUI => Singleton<CommonUI>.Instance;
 
@@ -81,8 +80,8 @@ namespace StashSearch
             _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();
             _searchRestoreButton = _searchRestoreButtonObject.GetComponentInChildren<Button>();
 
-            _inputField.onEndEdit.AddListener(delegate { StaticManager.BeginCoroutine(Search()); });
-            _searchRestoreButton.onClick.AddListener(delegate { StaticManager.BeginCoroutine(ClearSearch(true)); });
+            _inputField.onEndEdit.AddListener((_) => Search());
+            _searchRestoreButton.onClick.AddListener(() => ClearSearch());
 
             _searchController = new SearchController();
             Plugin.SearchControllers.Add(_searchController);
@@ -155,7 +154,7 @@ namespace StashSearch
             {
                 if (_searchController.IsSearchedState)
                 {
-                    StaticManager.BeginCoroutine(ClearSearch(true));
+                    ClearSearch();
                 }
             }
         }
@@ -163,7 +162,7 @@ namespace StashSearch
         /// <summary>
         /// Initializes the search
         /// </summary>
-        private IEnumerator Search()
+        private void Search()
         {
             Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
 
@@ -171,12 +170,19 @@ namespace StashSearch
             if (_searchController.IsSearchedState)
             {
                 // don't bother searching if term is the same as current search
-                if (_inputField.text == _searchController.CurrentSearchString) yield break;
+                if (_inputField.text == _searchController.CurrentSearchString)
+                {
+                    return;
+                }
 
-                yield return ClearSearch(false);
+                ClearSearch(false);
             }
 
-            if (_inputField.text == string.Empty) yield break;
+            // don't search for empty string
+            if (_inputField.text == string.Empty)
+            {
+                return;
+            }
 
             // Set the last searched grid, so we know what to reset on the clear keybind
             SearchController.LastSearchedGrid = GridViewOwner.Player;
@@ -189,15 +195,13 @@ namespace StashSearch
             _scrollRect.normalizedPosition = Vector3.up;
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, true);
-
-            yield break;
         }
 
         /// <summary>
         /// Clears the current search, optionally clearing the text of the search box
         /// </summary>
         /// <param name="clearText">If the search box text should be cleared</param>
-        private IEnumerator ClearSearch(bool clearText)
+        private void ClearSearch(bool clearText = true)
         {
             _searchController.RestoreHiddenItems(_playerStash.Grid);
 
@@ -211,10 +215,7 @@ namespace StashSearch
             }
 
             AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
-
-            yield break;
         }
-
 
         private void PopulateAutoComplete()
         {
