@@ -272,7 +272,7 @@ namespace StashSearch
         private void ClearStashSearch(bool clearText = true, bool checkTable = true)
         {
             // avoid losing items if trading table not empty
-            if (checkTable && CheckTradingTableEmpty())
+            if (checkTable && !CheckTradingTableEmpty())
             {
                 return;
             }
