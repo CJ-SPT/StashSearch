@@ -30,7 +30,9 @@ namespace StashSearch
         public static GameObject SearchRestoreButtonPrefab;
 
         public GameObject StashSearchGameObject;
+        public StashComponent StashComponent;
         public GameObject TraderSearchGameObject;
+        public TraderScreenComponent TraderScreenComponent;
 
         internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
 
@@ -55,6 +57,8 @@ namespace StashSearch
             new OnScreenChangedPatch().Enable();
             new SortingTablePatch().Enable();
             new CanQuickMoveToPatch().Enable();
+            new TraderAssortmentControllerClassSellPatch().Enable();
+            new TraderAssortmentControllerClassPurchasePatch().Enable();
         }
 
         private void Start()
@@ -67,6 +71,7 @@ namespace StashSearch
             // create a new gameobject parented under InventoryScreen with our component on it
             StashSearchGameObject = new GameObject("StashSearch", typeof(StashComponent));
             StashSearchGameObject.transform.SetParent(inventory.transform);
+            StashComponent = StashSearchGameObject.GetComponent<StashComponent>();
             return StashSearchGameObject;
         }
 
@@ -75,6 +80,7 @@ namespace StashSearch
             // create a new gameobject parented under TraderScreensGroup with our component on it
             TraderSearchGameObject = new GameObject("TraderSearch", typeof(TraderScreenComponent));
             TraderSearchGameObject.transform.SetParent(traderScreensGroup.transform);
+            TraderScreenComponent = TraderSearchGameObject.GetComponent<TraderScreenComponent>();
             return TraderSearchGameObject;
         }
 

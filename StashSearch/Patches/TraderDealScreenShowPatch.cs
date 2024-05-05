@@ -24,7 +24,7 @@ namespace StashSearch.Patches
                 return;
             }
 
-            TraderScreenComponent.MaybeChangingTrader(trader);
+            TraderScreenComponent.OnMaybeChangingTrader(trader);
         }
     }
 }
