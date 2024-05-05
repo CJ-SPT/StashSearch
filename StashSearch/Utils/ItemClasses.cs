@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 
 namespace StashSearch
@@ -22,7 +24,17 @@ namespace StashSearch
             Armor,
             Info,
             Keys,
-            FoundInRaid
+            Special,
+            FoundInRaid,
+            Money,
+            CuresLightBleed,
+            CuresHeavyBleed,
+            CuresFracture,
+            CuresConcussion,
+            CuresPain,
+            CuresBlackedLimb,
+            GivesHydration,
+            GivesEnergy,
         };
 
         public static readonly Dictionary<ItemClassId, Func<Item, bool>> ItemClassConditionMap = new Dictionary<ItemClassId, Func<Item, bool>>
@@ -42,7 +54,19 @@ namespace StashSearch
             {ItemClassId.Armor, item => item is GClass2637},
             {ItemClassId.Info, item => item is GClass2738},
             {ItemClassId.Keys, item => item is GClass2720},
+            {ItemClassId.Special, item => item is GClass2731},
             {ItemClassId.FoundInRaid, item => item.MarkedAsSpawnedInSession},
+            {ItemClassId.Money, item => item.TemplateId == "5449016a4bdc2d6f028b456f" || // ROUBLE
+                                       item.TemplateId == "5696686a4bdc2da3298b456a" || // DOLLAR
+                                       item.TemplateId == "569668774bdc2da2298b4568"},  // EURO
+            {ItemClassId.CuresLightBleed, item => CanItemCure(item, EDamageEffectType.LightBleeding)},
+            {ItemClassId.CuresHeavyBleed, item => CanItemCure(item, EDamageEffectType.HeavyBleeding)},
+            {ItemClassId.CuresFracture, item => CanItemCure(item, EDamageEffectType.Fracture)},
+            {ItemClassId.CuresConcussion, item => CanItemCure(item, EDamageEffectType.Contusion)},
+            {ItemClassId.CuresPain, item => CanItemCure(item, EDamageEffectType.Pain)},
+            {ItemClassId.CuresBlackedLimb, item => CanItemCure(item, EDamageEffectType.DestroyedPart)},
+            {ItemClassId.GivesHydration, item => CanItemGive(item, EHealthFactorType.Hydration)},
+            {ItemClassId.GivesEnergy, item => CanItemGive(item, EHealthFactorType.Energy)},
         };
 
         public static readonly Dictionary<string, ItemClassId> SearchTermMap = new Dictionary<string, ItemClassId>
@@ -69,8 +93,13 @@ namespace StashSearch
             {"medication", ItemClassId.Meds},
             {"medications", ItemClassId.Meds},
 
-            {"food", ItemClassId.FoodAndDrink},
-            {"drink", ItemClassId.FoodAndDrink},
+            {"food", ItemClassId.GivesEnergy},
+            {"energy", ItemClassId.GivesEnergy},
+
+            {"drink", ItemClassId.GivesHydration},
+            {"hydration", ItemClassId.GivesHydration},
+
+            {"foodanddrink", ItemClassId.FoodAndDrink},
 
             {"melee", ItemClassId.Melee},
             {"knife", ItemClassId.Melee},
@@ -107,8 +136,51 @@ namespace StashSearch
             {"key", ItemClassId.Keys},
             {"keys", ItemClassId.Keys},
 
+            {"special", ItemClassId.Special},
+
             {"fir", ItemClassId.FoundInRaid},
             {"foundinraid", ItemClassId.FoundInRaid},
+
+            {"money", ItemClassId.Money},
+            {"cash", ItemClassId.Money},
+
+            {"bandage", ItemClassId.CuresLightBleed},
+            {"lightbleed", ItemClassId.CuresLightBleed},
+
+            {"tourniquet", ItemClassId.CuresHeavyBleed},
+            {"heavybleed", ItemClassId.CuresHeavyBleed},
+
+            {"splint", ItemClassId.CuresFracture},
+            {"fracture", ItemClassId.CuresFracture},
+
+            {"concussion", ItemClassId.CuresConcussion},
+
+            {"painkiller", ItemClassId.CuresPain},
+
+            {"surgerykit", ItemClassId.CuresBlackedLimb},
+            {"blackedlimb", ItemClassId.CuresBlackedLimb},
         };
+
+        private static bool CanItemCure(Item item, EDamageEffectType damageType)
+        {
+            var hasComponent = item.TryGetItemComponent<HealthEffectsComponent>(out HealthEffectsComponent healthComponent);
+            if (!hasComponent)
+            {
+                return false;
+            }
+
+            return healthComponent.AffectsAny(damageType);
+        }
+
+        private static bool CanItemGive(Item item, EHealthFactorType healthType)
+        {
+            var hasComponent = item.TryGetItemComponent<HealthEffectsComponent>(out HealthEffectsComponent healthComponent);
+            if (!hasComponent)
+            {
+                return false;
+            }
+
+            return healthComponent.HealthEffects.Any(x => x.Key == healthType && x.Value.Value > 0);
+        }
     }
 }
