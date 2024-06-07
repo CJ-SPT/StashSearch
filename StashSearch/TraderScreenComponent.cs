@@ -61,6 +61,7 @@ namespace StashSearch
 
         // autocomplete
         private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
+
         private InputFieldAutoComplete _autoCompleteTrader;
         private DateTime _lastAutoCompleteFillTrader = DateTime.MinValue;
         private InputFieldAutoComplete _autoCompletePlayer;
@@ -118,8 +119,8 @@ namespace StashSearch
             _gridViewTradingTable = (TradingTableGridView)AccessTools.Field(typeof(TradingTable), "_tableGridView").GetValue(tradingTable);
 
             // Instantiate a search controller for each grid
-            _searchControllerPlayer = new SearchController();
-            _searchControllerTrader = new SearchController();
+            _searchControllerPlayer = new SearchController(true);
+            _searchControllerTrader = new SearchController(false);
 
             Plugin.SearchControllers.Add(_searchControllerPlayer);
             Plugin.SearchControllers.Add(_searchControllerTrader);
@@ -149,7 +150,8 @@ namespace StashSearch
             _inputFieldTrader.text = string.Empty;
             _lastTrader = null;
 
-            // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch do it
+            // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
+            //       do it
         }
 
         private void Update()
@@ -194,7 +196,7 @@ namespace StashSearch
             {
                 _inputFieldTrader.text = string.Empty;
 
-                // HACK: clear the current search when trader is about to change 
+                // HACK: clear the current search when trader is about to change
                 _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
 
                 // reset the autocomplete throttle

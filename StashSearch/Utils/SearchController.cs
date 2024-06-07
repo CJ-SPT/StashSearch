@@ -1,11 +1,11 @@
-﻿using System;
-using EFT.InventoryLogic;
-using System.Collections.Generic;
-using System.Linq;
+﻿using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using System;
 using System.Collections;
-using EFT.UI;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace StashSearch.Utils
@@ -21,13 +21,15 @@ namespace StashSearch.Utils
 
         // access to open windows to be able to close them
         private static FieldInfo _windowListField = AccessTools.Field(typeof(ItemUiContext), "list_0");
+
         private static FieldInfo _windowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(LootItemClass));
         private static FieldInfo _windowContainerWindowField = AccessTools.Field(AccessTools.FirstInner(typeof(ItemUiContext), x => x.GetField("WindowType") != null), "Window");
 
         private char[] _trimChars = [' ', ',', '.', '/', '\\'];
 
-        public SearchController() 
+        public SearchController(bool isPlayerStash)
         {
+            IsPlayerStash = isPlayerStash;
         }
 
         /// <summary>
@@ -51,7 +53,7 @@ namespace StashSearch.Utils
             _itemsToReshowAfterSearch.Clear();
 
             // Recursively search, starting at the player stash
-            SearchGrid(searchString, gridToSearch);         
+            SearchGrid(searchString, gridToSearch);
 
             // Clear any remaining items in the player stash, storing them to restore later
             foreach (var item in SearchedGrid.ContainedItems.ToArray())
@@ -89,7 +91,8 @@ namespace StashSearch.Utils
                 // Restore the items back in the order they were in originally.
                 foreach (var item in itemsToRestore)
                 {
-                    // If the item still exists in the _itemsToShowAfterSearch dict, it means the player moved it, don't try to restore it
+                    // If the item still exists in the _itemsToShowAfterSearch dict, it means the
+                    // player moved it, don't try to restore it
                     if (!_itemsToReshowAfterSearch.Contains(item.Item))
                     {
                         item.Grid.AddItemWithoutRestrictions(item.Item, item.Location);
@@ -119,8 +122,8 @@ namespace StashSearch.Utils
         {
             if (searchResult != null)
             {
-                // If we were given search results to show, clean up the gridItemDict of any items not in our search results
-                // This is required because BSG's code is broken
+                // If we were given search results to show, clean up the gridItemDict of any items
+                // not in our search results This is required because BSG's code is broken
                 var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
 
                 foreach (var itemView in gridItemDict.Values.ToArray())
@@ -146,7 +149,7 @@ namespace StashSearch.Utils
         private void SearchGrid(string searchString, StashGridClass gridToSearch)
         {
             try
-            { 
+            {
                 // Iterate over all child items on the grid
                 foreach (var gridItem in gridToSearch.ContainedItems.ToArray())
                 {
@@ -179,7 +182,7 @@ namespace StashSearch.Utils
             catch (Exception e)
             {
                 throw new Exception("Search action exception:", e);
-            }      
+            }
         }
 
         /// <summary>
@@ -190,8 +193,8 @@ namespace StashSearch.Utils
             bool overflowShown = false;
             try
             {
-                // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE
-                //       It will break moving an item out of the search results
+                // Note: DO NOT CLEAR _itemsToReshowAfterSearch HERE It will break moving an item
+                // out of the search results
                 foreach (var item in _itemsToReshowAfterSearch.ToArray().OrderBy(x => x.LocalizedName()))
                 {
                     var newLoc = SearchedGrid.FindFreeSpace(item);
@@ -247,9 +250,9 @@ namespace StashSearch.Utils
                 {
                     return true;
                 }
-                
-                // check full name 
-                var fullName = item.LocalizedName().ToLower();         
+
+                // check full name
+                var fullName = item.LocalizedName().ToLower();
                 if (fullName.Contains(searchTerm))
                 {
                     return true;
@@ -306,7 +309,7 @@ namespace StashSearch.Utils
                 {
                     continue;
                 }
-        
+
                 GridWindow gridWindow = (GridWindow)window;
                 var lootItem = _windowLootItemField.GetValue(gridWindow) as LootItemClass;
                 gridWindows.Add(lootItem.Id, gridWindow);

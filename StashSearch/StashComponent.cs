@@ -20,6 +20,8 @@ namespace StashSearch
 {
     public class StashComponent : MonoBehaviour
     {
+        public static StashComponent Instance { get; private set; }
+
         private CommonUI _commonUI => Singleton<CommonUI>.Instance;
 
         private SearchController _searchController;
@@ -58,6 +60,7 @@ namespace StashSearch
 
         public StashComponent()
         {
+            Instance = this;
         }
 
         private void Awake()
@@ -83,7 +86,7 @@ namespace StashSearch
             _inputField.onEndEdit.AddListener((_) => Search());
             _searchRestoreButton.onClick.AddListener(() => ClearSearch());
 
-            _searchController = new SearchController();
+            _searchController = new SearchController(true);
             Plugin.SearchControllers.Add(_searchController);
 
             // add autocomplete and populate autocomplete onselect
@@ -110,7 +113,6 @@ namespace StashSearch
             _complexStash.RectTransform.sizeDelta = new Vector2(680, -260);
             _complexStash.Transform.localPosition = new Vector3(948, 12, 0);
             _hasMovedComplexStash = true;
-
         }
 
         private void OnDisable()
@@ -129,8 +131,9 @@ namespace StashSearch
                 _complexStash.Transform.localPosition = _oldComplexStashLocalPosition;
                 _hasMovedComplexStash = false;
             }
-            
-            // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch do it
+
+            // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
+            // do it
         }
 
         private void Update()
