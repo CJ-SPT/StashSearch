@@ -1,7 +1,8 @@
-﻿using System;
+﻿using StashSearch.Utils;
+using System;
 using System.Collections.Generic;
 
-namespace StashSearch.Utils
+namespace StashSearch.Search
 {
     internal abstract class AbstractSearchController
     {

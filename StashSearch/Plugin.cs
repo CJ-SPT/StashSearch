@@ -1,9 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
-using DrakiaXYZ.VersionChecker;
 using EFT.UI;
 using StashSearch.Config;
 using StashSearch.Patches;
+using StashSearch.Search;
 using StashSearch.Utils;
 using System;
 using System.Collections.Generic;
@@ -60,6 +60,7 @@ namespace StashSearch
             new TraderAssortmentControllerClassSellPatch().Enable();
             new TraderAssortmentControllerClassPurchasePatch().Enable();
             new ActionsReturnPatch().Enable();
+            new ItemFactoryConstructorPatch().Enable();
         }
 
         private void Start()

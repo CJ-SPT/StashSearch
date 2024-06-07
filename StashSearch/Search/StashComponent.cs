@@ -16,7 +16,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace StashSearch
+namespace StashSearch.Search
 {
     public class StashComponent : MonoBehaviour
     {

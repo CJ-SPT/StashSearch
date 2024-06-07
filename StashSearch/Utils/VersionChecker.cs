@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace DrakiaXYZ.VersionChecker
+namespace StashSearch.Utils
 {
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = false)]
     public class VersionChecker : Attribute
@@ -24,7 +24,7 @@ namespace DrakiaXYZ.VersionChecker
         public static bool CheckEftVersion(ManualLogSource Logger, PluginInfo Info, ConfigFile Config = null)
         {
             int currentVersion = FileVersionInfo.GetVersionInfo(BepInEx.Paths.ExecutablePath).FilePrivatePart;
-            int buildVersion = StashSearch.Plugin.TarkovVersion;
+            int buildVersion = Plugin.TarkovVersion;
             if (currentVersion != buildVersion)
             {
                 string errorMessage = $"ERROR: This version of Stash Search was built for Tarkov {buildVersion}, but you are running {currentVersion}. Please download the correct plugin version.";
@@ -78,9 +78,9 @@ namespace DrakiaXYZ.VersionChecker
         internal sealed class ConfigurationManagerAttributes
         {
             public bool? ShowRangeAsPercent;
-            public System.Action<BepInEx.Configuration.ConfigEntryBase> CustomDrawer;
+            public Action<ConfigEntryBase> CustomDrawer;
             public CustomHotkeyDrawerFunc CustomHotkeyDrawer;
-            public delegate void CustomHotkeyDrawerFunc(BepInEx.Configuration.ConfigEntryBase setting, ref bool isCurrentlyAcceptingInput);
+            public delegate void CustomHotkeyDrawerFunc(ConfigEntryBase setting, ref bool isCurrentlyAcceptingInput);
             public bool? Browsable;
             public string Category;
             public object DefaultValue;
@@ -91,8 +91,8 @@ namespace DrakiaXYZ.VersionChecker
             public int? Order;
             public bool? ReadOnly;
             public bool? IsAdvanced;
-            public System.Func<object, string> ObjToStr;
-            public System.Func<string, object> StrToObj;
+            public Func<object, string> ObjToStr;
+            public Func<string, object> StrToObj;
         }
     }
 }

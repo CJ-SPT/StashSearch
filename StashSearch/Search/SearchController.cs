@@ -2,6 +2,7 @@
 using EFT.UI;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using StashSearch.Search;
 using System;
 using System.Collections;
 using System.Collections.Generic;
