@@ -2,6 +2,7 @@
 using EFT.UI;
 using EFT.UI.Screens;
 using HarmonyLib;
+using StashSearch.Utils;
 using System.Reflection;
 
 namespace StashSearch.Patches
@@ -21,9 +22,9 @@ namespace StashSearch.Patches
         {
             CurrentScreen = eftScreenType;
 
-            Logger.LogDebug(eftScreenType);
+            Logger.LogDebug($"Current screen: {eftScreenType}");
 
-            foreach (var controller in Plugin.SearchControllers)
+            foreach (var controller in InstanceManager.SearchControllers)
             {
                 if (controller.IsSearchedState && controller.SearchedGrid != null)
                 {

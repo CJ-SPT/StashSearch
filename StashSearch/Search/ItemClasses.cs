@@ -4,11 +4,12 @@ using System.Linq;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 
-namespace StashSearch
+namespace StashSearch.Search
 {
     public static class ItemClasses
     {
-        public enum ItemClassId {
+        public enum ItemClassId
+        {
             Weapons,
             Magazines,
             Ammo,
@@ -163,7 +164,7 @@ namespace StashSearch
 
         private static bool CanItemCure(Item item, EDamageEffectType damageType)
         {
-            var hasComponent = item.TryGetItemComponent<HealthEffectsComponent>(out HealthEffectsComponent healthComponent);
+            var hasComponent = item.TryGetItemComponent(out HealthEffectsComponent healthComponent);
             if (!hasComponent)
             {
                 return false;
@@ -174,7 +175,7 @@ namespace StashSearch
 
         private static bool CanItemGive(Item item, EHealthFactorType healthType)
         {
-            var hasComponent = item.TryGetItemComponent<HealthEffectsComponent>(out HealthEffectsComponent healthComponent);
+            var hasComponent = item.TryGetItemComponent(out HealthEffectsComponent healthComponent);
             if (!hasComponent)
             {
                 return false;

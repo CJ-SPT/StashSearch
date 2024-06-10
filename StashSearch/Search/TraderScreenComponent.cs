@@ -13,6 +13,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using static StashSearch.Utils.InstanceManager.SearchObjects;
+
 namespace StashSearch.Search
 {
     public class TraderScreenComponent : MonoBehaviour
@@ -100,14 +102,14 @@ namespace StashSearch.Search
             }
 
             // Instantiate our search box prefabs
-            _searchBoxObjectPlayer = Instantiate(Plugin.PlayerSearchBoxPrefab, _rectTransformPlayer.transform);
-            _searchBoxObjectTrader = Instantiate(Plugin.TraderSearchBoxPrefab, _rectTransformTrader.transform);
+            _searchBoxObjectPlayer = Instantiate(PlayerSearchBoxPrefab, _rectTransformPlayer.transform);
+            _searchBoxObjectTrader = Instantiate(TraderSearchBoxPrefab, _rectTransformTrader.transform);
             _inputFieldPlayer = _searchBoxObjectPlayer.GetComponentInChildren<TMP_InputField>();
             _inputFieldTrader = _searchBoxObjectTrader.GetComponentInChildren<TMP_InputField>();
 
             // Instantiate our button prefabs
-            _searchButtonObjectPlayer = Instantiate(Plugin.SearchRestoreButtonPrefab, _rectTransformPlayer.transform);
-            _searchButtonObjectTrader = Instantiate(Plugin.SearchRestoreButtonPrefab, _rectTransformTrader.transform);
+            _searchButtonObjectPlayer = Instantiate(SearchRestoreButtonPrefab, _rectTransformPlayer.transform);
+            _searchButtonObjectTrader = Instantiate(SearchRestoreButtonPrefab, _rectTransformTrader.transform);
             _searchRestoreButtonPlayer = _searchButtonObjectPlayer.GetComponentInChildren<Button>();
             _searchRestoreButtonTrader = _searchButtonObjectTrader.GetComponentInChildren<Button>();
 
@@ -122,8 +124,8 @@ namespace StashSearch.Search
             _searchControllerPlayer = new SearchController(true);
             _searchControllerTrader = new SearchController(false);
 
-            Plugin.SearchControllers.Add(_searchControllerPlayer);
-            Plugin.SearchControllers.Add(_searchControllerTrader);
+            InstanceManager.SearchControllers.Add(_searchControllerPlayer);
+            InstanceManager.SearchControllers.Add(_searchControllerTrader);
 
             // Add our listeners
             _inputFieldPlayer.onEndEdit.AddListener((_) => SearchStash());
@@ -151,7 +153,7 @@ namespace StashSearch.Search
             _lastTrader = null;
 
             // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
-            //       do it
+            // do it
         }
 
         private void Update()

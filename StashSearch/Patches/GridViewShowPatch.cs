@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using EFT.UI.DragAndDrop;
 using HarmonyLib;
+using StashSearch.Utils;
 using System.Reflection;
 
 namespace StashSearch.Patches
@@ -15,7 +16,7 @@ namespace StashSearch.Patches
         [PatchPostfix]
         public static void PatchPostfix(GridView __instance)
         {
-            foreach (var controller in Plugin.SearchControllers)
+            foreach (var controller in InstanceManager.SearchControllers)
             {
                 // Don't do anything if search isn't enabled or the searched grid is null
                 if (!controller.IsSearchedState || controller.SearchedGrid == null)
@@ -35,7 +36,7 @@ namespace StashSearch.Patches
                     Plugin.Log.LogDebug("Setting grid non interactable.");
                     AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(__instance, true);
                 }
-            }        
+            }
         }
     }
 }

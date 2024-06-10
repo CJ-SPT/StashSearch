@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using EFT.UI;
 using HarmonyLib;
+using StashSearch.Utils;
 using System.Reflection;
 
 namespace StashSearch.Patches
@@ -19,7 +20,7 @@ namespace StashSearch.Patches
         [PatchPrefix]
         public static bool PatchPrefix()
         {
-            foreach (var controller in Plugin.SearchControllers)
+            foreach (var controller in InstanceManager.SearchControllers)
             {
                 if (controller.IsSearchedState)
                 {

@@ -5,11 +5,13 @@ using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Search;
 using StashSearch.Utils;
+using StashSearch.UtilsPatches;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+
+using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 #pragma warning disable
 
@@ -23,18 +25,7 @@ namespace StashSearch
         public static Plugin? Instance;
         public static ManualLogSource Log;
 
-        public static string PluginFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-        public static GameObject PlayerSearchBoxPrefab;
-        public static GameObject TraderSearchBoxPrefab;
-        public static GameObject SearchRestoreButtonPrefab;
-
-        public GameObject StashSearchGameObject;
-        public StashComponent StashComponent;
-        public GameObject TraderSearchGameObject;
-        public TraderScreenComponent TraderScreenComponent;
-
-        internal static List<AbstractSearchController> SearchControllers = new List<AbstractSearchController>();
+        internal static bool IsRestorationRunning = false;
 
         internal void Awake()
         {
@@ -59,8 +50,18 @@ namespace StashSearch
             new CanQuickMoveToPatch().Enable();
             new TraderAssortmentControllerClassSellPatch().Enable();
             new TraderAssortmentControllerClassPurchasePatch().Enable();
-            new ActionsReturnPatch().Enable();
-            new ItemFactoryConstructorPatch().Enable();
+
+            new OverLappingErrorPatch().Enable();
+
+            // ItemUIContextPatches
+            new FoldItemPatch().Enable();
+            new UnloadWeaponPatch().Enable();
+            new UnloadAmmoPatch().Enable();
+
+            // Utility patches
+            new ItemUIContextPatch().Enable();
+            new InventoryControllerPatch().Enable();
+            new TraderControllerPatch().Enable();
         }
 
         private void Start()
@@ -68,12 +69,20 @@ namespace StashSearch
             LoadBundle();
         }
 
+        public void Update()
+        {
+            if (ItemRestoration.CanRun())
+            {
+                ItemRestoration.RestoreItems();
+            }
+        }
+
         public GameObject AttachToInventoryScreen(InventoryScreen inventory)
         {
             // create a new gameobject parented under InventoryScreen with our component on it
             StashSearchGameObject = new GameObject("StashSearch", typeof(StashComponent));
             StashSearchGameObject.transform.SetParent(inventory.transform);
-            StashComponent = StashSearchGameObject.GetComponent<StashComponent>();
+            InstanceManager.SearchObjects.StashComponent = InstanceManager.SearchObjects.StashSearchGameObject.GetComponent<StashComponent>();
             return StashSearchGameObject;
         }
 
@@ -82,13 +91,15 @@ namespace StashSearch
             // create a new gameobject parented under TraderScreensGroup with our component on it
             TraderSearchGameObject = new GameObject("TraderSearch", typeof(TraderScreenComponent));
             TraderSearchGameObject.transform.SetParent(traderScreensGroup.transform);
-            TraderScreenComponent = TraderSearchGameObject.GetComponent<TraderScreenComponent>();
+            InstanceManager.SearchObjects.TraderScreenComponent = TraderSearchGameObject.GetComponent<TraderScreenComponent>();
             return TraderSearchGameObject;
         }
 
         private void LoadBundle()
         {
-            var searchField = Path.Combine(PluginFolder, "StashSearch.bundle");
+            var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+            var searchField = Path.Combine(assemblyPath, "StashSearch.bundle");
 
             var bundle = AssetBundle.LoadFromFile(searchField);
 

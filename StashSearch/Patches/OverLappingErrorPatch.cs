@@ -1,21 +1,16 @@
 ﻿using Aki.Reflection.Patching;
-using Aki.Reflection.Utils;
-using EFT;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using StashSearch.Utils;
 using System.Reflection;
 using static StashGridClass;
 
 namespace StashSearch.Patches
 {
-    internal class ItemFactoryConstructorPatch : ModulePatch
+    internal class OverLappingErrorPatch : ModulePatch
     {
-        private static Profile _profile;
-
         protected override MethodBase GetTargetMethod()
         {
-            _profile = ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile;
-
             // TODO: Cache this type
             return AccessTools.Constructor(
                 typeof(GClass3287),
@@ -23,9 +18,9 @@ namespace StashSearch.Patches
         }
 
         [PatchPostfix]
-        public static void Postfix(Item item, LocationInGrid location, StashGridClass grid)
+        public static void Postfix(GClass3287 __instance)
         {
-            Plugin.Log.LogError($"Overlapping item found {item.Id} at location ({location.x},{location.y}) rotation {location.r})");
+            ItemRestoration.AddItem(new(__instance.Item, __instance.Location, __instance.Grid));
         }
     }
 }

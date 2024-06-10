@@ -1,6 +1,7 @@
 ﻿using Aki.Reflection.Patching;
 using EFT.InventoryLogic;
 using HarmonyLib;
+using StashSearch.Utils;
 using System.Reflection;
 
 namespace StashSearch.Patches
@@ -24,7 +25,7 @@ namespace StashSearch.Patches
                 return;
             }
 
-            foreach (var controller in Plugin.SearchControllers)
+            foreach (var controller in InstanceManager.SearchControllers)
             {
                 if (controller.IsSearchedState)
                 {

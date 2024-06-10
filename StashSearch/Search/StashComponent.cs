@@ -16,6 +16,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+using static StashSearch.Utils.InstanceManager.SearchObjects;
+
 namespace StashSearch.Search
 {
     public class StashComponent : MonoBehaviour
@@ -72,8 +74,8 @@ namespace StashSearch.Search
             _complexStash = (ComplexStashPanel)AccessTools.Field(typeof(ItemsPanel), "_complexStashPanel").GetValue(_itemsPanel);
 
             // Instantiate the prefab, set its anchor to the SimpleStashPanel
-            _searchObject = Instantiate(Plugin.PlayerSearchBoxPrefab, _simpleStash.transform);
-            _searchRestoreButtonObject = Instantiate(Plugin.SearchRestoreButtonPrefab, _simpleStash.transform);
+            _searchObject = Instantiate(PlayerSearchBoxPrefab, _simpleStash.transform);
+            _searchRestoreButtonObject = Instantiate(SearchRestoreButtonPrefab, _simpleStash.transform);
 
             // Adjust the rects anchored position
             _searchObject.RectTransform().anchoredPosition = new Vector3(-52, 73);
@@ -87,7 +89,7 @@ namespace StashSearch.Search
             _searchRestoreButton.onClick.AddListener(() => ClearSearch());
 
             _searchController = new SearchController(true);
-            Plugin.SearchControllers.Add(_searchController);
+            InstanceManager.SearchControllers.Add(_searchController);
 
             // add autocomplete and populate autocomplete onselect
             _autoCompleteComponent = new(_inputField);

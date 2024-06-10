@@ -2,6 +2,8 @@
 using HarmonyLib;
 using System.Reflection;
 
+using static StashSearch.Utils.InstanceManager.SearchObjects;
+
 namespace StashSearch.Patches
 {
     internal class TraderAssortmentControllerClassPurchasePatch : ModulePatch
@@ -17,7 +19,7 @@ namespace StashSearch.Patches
         [PatchPrefix]
         public static void PatchPrefix()
         {
-            Plugin.Instance.TraderScreenComponent.OnTraderTransaction();
+            TraderScreenComponent.OnTraderTransaction();
         }
     }
 }
