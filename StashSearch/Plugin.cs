@@ -17,7 +17,7 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.1.2")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
