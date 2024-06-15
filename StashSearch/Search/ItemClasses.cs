@@ -1,8 +1,8 @@
+using EFT.HealthSystem;
+using EFT.InventoryLogic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EFT.HealthSystem;
-using EFT.InventoryLogic;
 
 namespace StashSearch.Search
 {
@@ -27,6 +27,7 @@ namespace StashSearch.Search
             Keys,
             Special,
             FoundInRaid,
+            NotFoundInRaid,
             Money,
             CuresLightBleed,
             CuresHeavyBleed,
@@ -57,6 +58,7 @@ namespace StashSearch.Search
             {ItemClassId.Keys, item => item is GClass2720},
             {ItemClassId.Special, item => item is GClass2731},
             {ItemClassId.FoundInRaid, item => item.MarkedAsSpawnedInSession},
+            {ItemClassId.NotFoundInRaid, item => !item.MarkedAsSpawnedInSession },
             {ItemClassId.Money, item => item.TemplateId == "5449016a4bdc2d6f028b456f" || // ROUBLE
                                        item.TemplateId == "5696686a4bdc2da3298b456a" || // DOLLAR
                                        item.TemplateId == "569668774bdc2da2298b4568"},  // EURO
@@ -141,6 +143,9 @@ namespace StashSearch.Search
 
             {"fir", ItemClassId.FoundInRaid},
             {"foundinraid", ItemClassId.FoundInRaid},
+
+            {"notfir", ItemClassId.NotFoundInRaid},
+            {"notfoundinraid", ItemClassId.NotFoundInRaid },
 
             {"money", ItemClassId.Money},
             {"cash", ItemClassId.Money},

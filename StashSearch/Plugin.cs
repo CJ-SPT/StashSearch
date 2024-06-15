@@ -17,7 +17,7 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.2.0")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.2.1")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
@@ -51,7 +51,7 @@ namespace StashSearch
             new TraderAssortmentControllerClassSellPatch().Enable();
             new TraderAssortmentControllerClassPurchasePatch().Enable();
 
-            new OverLappingErrorPatch().Enable();
+            //new OverLappingErrorPatch().Enable();
 
             // ItemUIContextPatches
             new FoldItemPatch().Enable();
@@ -69,6 +69,7 @@ namespace StashSearch
             LoadBundle();
         }
 
+        /*
         public void Update()
         {
             if (ItemRestoration.CanRun())
@@ -76,6 +77,7 @@ namespace StashSearch
                 ItemRestoration.RestoreItems();
             }
         }
+        */
 
         public GameObject AttachToInventoryScreen(InventoryScreen inventory)
         {
