@@ -9,6 +9,7 @@ using StashSearch.UtilsPatches;
 using System;
 using System.IO;
 using System.Reflection;
+using EFT.UI.Settings;
 using UnityEngine;
 
 using static StashSearch.Utils.InstanceManager.SearchObjects;
@@ -17,7 +18,7 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.2.1")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const int TarkovVersion = 29197;
@@ -43,6 +44,7 @@ namespace StashSearch
 
             new GridViewShowPatch().Enable();
             new InventoryScreenShowPatch().Enable();
+            new SettingsScreenShowPatch().Enable();
             new TraderScreensGroupShowPatch().Enable();
             new TraderDealScreenShowPatch().Enable();
             new OnScreenChangedPatch().Enable();
@@ -84,7 +86,7 @@ namespace StashSearch
             // create a new gameobject parented under InventoryScreen with our component on it
             StashSearchGameObject = new GameObject("StashSearch", typeof(StashComponent));
             StashSearchGameObject.transform.SetParent(inventory.transform);
-            InstanceManager.SearchObjects.StashComponent = InstanceManager.SearchObjects.StashSearchGameObject.GetComponent<StashComponent>();
+            InstanceManager.SearchObjects.StashComponent = StashSearchGameObject.GetComponent<StashComponent>();
             return StashSearchGameObject;
         }
 
@@ -97,6 +99,14 @@ namespace StashSearch
             return TraderSearchGameObject;
         }
 
+        public GameObject AttachToSettingsScreen(SettingsScreen controlSettingsTab)
+        {
+            SettingsSearchGameObject = new GameObject("SettingsSearch", typeof(SettingsComponent));
+            SettingsSearchGameObject.transform.SetParent(controlSettingsTab.transform);
+            SettingsScreenComponent = SettingsSearchGameObject.GetComponent<SettingsComponent>();
+            return SettingsSearchGameObject;
+        }
+        
         private void LoadBundle()
         {
             var assemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);

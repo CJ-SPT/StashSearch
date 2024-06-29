@@ -29,6 +29,9 @@ namespace StashSearch.Utils
             public static StashComponent StashComponent;
             public static GameObject TraderSearchGameObject;
             public static TraderScreenComponent TraderScreenComponent;
+
+            public static GameObject SettingsSearchGameObject;
+            public static SettingsComponent SettingsScreenComponent;
         }
     }
 }
