@@ -138,7 +138,7 @@ namespace StashSearch.Utils
             }
 
             // Trigger the gridView to redraw
-            gridView.OnRefreshContainer(new RefreshGridEventArgs(gridView.Grid));
+            gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
         }
 
         /// <summary>
