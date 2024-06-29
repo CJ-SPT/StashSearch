@@ -39,7 +39,7 @@ namespace StashSearch.Search
             GivesEnergy,
         };
 
-        public static readonly Dictionary<ItemClassId, Func<Item, bool>> ItemClassConditionMap = new Dictionary<ItemClassId, Func<Item, bool>>
+        public static readonly Dictionary<ItemClassId, Func<Item, bool>> ItemClassConditionMap = new()
         {
             {ItemClassId.Weapons, item => item is Weapon},
             {ItemClassId.Magazines, item => item is MagazineClass},
@@ -49,14 +49,14 @@ namespace StashSearch.Search
             {ItemClassId.Melee, item => item is KnifeClass},
             {ItemClassId.WeaponMods, item => item is Mod},
             {ItemClassId.Grenades, item => item is GrenadeClass},
-            {ItemClassId.Barter, item => item is GClass2704},
-            {ItemClassId.Rigs, item => item is GClass2685},
+            {ItemClassId.Barter, item => item is BarterItemClass}, // Was GClass2704
+            {ItemClassId.Rigs, item => item is RigClass}, // Was GClass2685
             {ItemClassId.Goggles, item => item is GogglesClass},
-            {ItemClassId.Containers, item => item is SearchableItemClass || item is GClass2686},
-            {ItemClassId.Armor, item => item is GClass2637},
-            {ItemClassId.Info, item => item is GClass2738},
-            {ItemClassId.Keys, item => item is GClass2720},
-            {ItemClassId.Special, item => item is GClass2731},
+            {ItemClassId.Containers, item => item is SearchableItemClass || item is SimpleContainerClass}, // Was GClass2686
+            {ItemClassId.Armor, item => item is ArmorItemClass}, // Was GClass2637
+            {ItemClassId.Info, item => item is InfoItemClass}, // Was GClass2738
+            {ItemClassId.Keys, item => item is KeyItemClass}, // Was GClass2720
+            {ItemClassId.Special, item => item is SpecialItemClass}, // Was GClass2731
             {ItemClassId.FoundInRaid, item => item.MarkedAsSpawnedInSession},
             {ItemClassId.NotFoundInRaid, item => !item.MarkedAsSpawnedInSession },
             {ItemClassId.Money, item => item.TemplateId == "5449016a4bdc2d6f028b456f" || // ROUBLE
