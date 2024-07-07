@@ -1,7 +1,6 @@
-﻿using Aki.Reflection.Patching;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System.Reflection;
-
+using SPT.Reflection.Patching;
 using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch.Patches

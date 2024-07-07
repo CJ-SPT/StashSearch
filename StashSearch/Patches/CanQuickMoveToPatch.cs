@@ -1,8 +1,8 @@
-﻿using Aki.Reflection.Patching;
-using EFT.InventoryLogic;
+﻿using EFT.InventoryLogic;
 using HarmonyLib;
 using StashSearch.Utils;
 using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace StashSearch.Patches
 {

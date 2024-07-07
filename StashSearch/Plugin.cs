@@ -5,7 +5,6 @@ using StashSearch.Config;
 using StashSearch.Patches;
 using StashSearch.Search;
 using StashSearch.Utils;
-using StashSearch.UtilsPatches;
 using System;
 using System.IO;
 using System.Reflection;
@@ -18,16 +17,14 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch
 {
-    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.0")]
+    [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.1")]
     public class Plugin : BaseUnityPlugin
     {
-        public const int TarkovVersion = 29197;
+        public const int TarkovVersion = 30626;
 
         public static Plugin? Instance;
         public static ManualLogSource Log;
-
-        internal static bool IsRestorationRunning = false;
-
+        
         internal void Awake()
         {
             if (!VersionChecker.CheckEftVersion(Logger, Info, Config))
@@ -59,28 +56,13 @@ namespace StashSearch
             new FoldItemPatch().Enable();
             new UnloadWeaponPatch().Enable();
             new UnloadAmmoPatch().Enable();
-
-            // Utility patches
-            new ItemUIContextPatch().Enable();
-            new InventoryControllerPatch().Enable();
-            new TraderControllerPatch().Enable();
         }
 
         private void Start()
         {
             LoadBundle();
         }
-
-        /*
-        public void Update()
-        {
-            if (ItemRestoration.CanRun())
-            {
-                ItemRestoration.RestoreItems();
-            }
-        }
-        */
-
+        
         public GameObject AttachToInventoryScreen(InventoryScreen inventory)
         {
             // create a new gameobject parented under InventoryScreen with our component on it

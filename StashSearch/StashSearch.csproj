@@ -41,11 +41,11 @@
         <Reference Include="UnityEngine">
             <HintPath>$(SolutionDir)dependencies\UnityEngine.dll</HintPath>
         </Reference>
-        <Reference Include="Aki.reflection">
-            <HintPath>$(SolutionDir)dependencies\Aki.Reflection.dll</HintPath>
+        <Reference Include="SPT-Reflection">
+            <HintPath>$(SolutionDir)dependencies\SPT-Reflection.dll</HintPath>
         </Reference>
-		<Reference Include="Aki.Common">
-			<HintPath>$(SolutionDir)dependencies\Aki.Common.dll</HintPath>
+		<Reference Include="SPT-Common">
+			<HintPath>$(SolutionDir)dependencies\SPT-Common.dll</HintPath>
 		</Reference>
         <Reference Include="Sirenix.Serialization">
             <HintPath>$(SolutionDir)dependencies\Sirenix.Serialization.dll</HintPath>
@@ -78,7 +78,7 @@
 
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.8.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.8.0 - Dev\BepInEx\config\com.dirtbikercj.StashSearch.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\StashSearch.bundle&quot; &quot;G:\3.8.0 - Dev\BepInEx\plugins\StashSearch\&quot; /Y" />
+        <Exec Command="copy &quot;$(TargetPath)&quot; &quot;G:\3.9.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).dll&quot;&#xD;&#xA;if $(ConfigurationName) == Debug (&#xD;&#xA;    copy &quot;$(ProjectDir)$(OutDir)$(TargetName).pdb&quot; &quot;G:\3.9.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).pdb&quot;&#xD;&#xA;) else (&#xD;&#xA;    del &quot;G:\3.9.0 - Dev\BepInEx\plugins\StashSearch\$(TargetName).pdb&quot;&#xD;&#xA;)&#xD;&#xA;&#xD;&#xA;del &quot;G:\3.9.0 - Dev\BepInEx\config\com.dirtbikercj.StashSearch.cfg&quot;&#xD;&#xA;&#xD;&#xA;xcopy &quot;$(ProjectDir)Prefab\StashSearch.bundle&quot; &quot;G:\3.9.0 - Dev\BepInEx\plugins\StashSearch\&quot; /Y" />
     </Target>
 
 
