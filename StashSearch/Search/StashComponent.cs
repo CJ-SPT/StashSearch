@@ -99,13 +99,13 @@ namespace StashSearch.Search
         private void OnEnable()
         {
             // skip enabling search bar if loaded into a map
-            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
+            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance?.MainPlayer is not HideoutPlayer)
             {
                 Plugin.Log.LogDebug($"Player in raid, not enabling search");
                 return;
             }
 
-            // enable the search bar
+            // enable the search barD
             _searchObject.SetActive(true);
             _searchRestoreButtonObject.SetActive(true);
 
