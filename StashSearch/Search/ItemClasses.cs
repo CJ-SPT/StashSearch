@@ -1,8 +1,8 @@
-using EFT.HealthSystem;
-using EFT.InventoryLogic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using EFT.HealthSystem;
+using EFT.InventoryLogic;
 
 namespace StashSearch.Search;
 
@@ -37,7 +37,7 @@ public static class ItemClasses
         CuresBlackedLimb,
         GivesHydration,
         GivesEnergy,
-    };
+    }
 
     public static readonly Dictionary<ItemClassId, Func<Item, bool>> ItemClassConditionMap = new Dictionary<ItemClassId, Func<Item, bool>>
     {
