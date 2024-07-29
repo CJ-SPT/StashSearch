@@ -22,7 +22,7 @@ public class SettingsComponent : MonoBehaviour
     private List<CommandKeyPair> _commandKeyPairs;
     private List<CommandAxisPair> _commandAxisPairs;
     
-    private Vector3 _oldContolPanelLocalPosition;
+    private Vector3 _oldControlPanelLocalPosition;
     
     // Search GameObject and TMP_InputField
     private GameObject _searchObject;
@@ -65,13 +65,13 @@ public class SettingsComponent : MonoBehaviour
 
     private void OnEnable()
     {
-        _oldContolPanelLocalPosition = _controlSettingsPanel.transform.localPosition;
+        _oldControlPanelLocalPosition = _controlSettingsPanel.transform.localPosition;
         _controlSettingsPanel.transform.localPosition = new Vector3(-30, -95, 0);
     }
 
     private void OnDisable()
     {
-        _controlSettingsPanel.transform.localPosition = _oldContolPanelLocalPosition;
+        _controlSettingsPanel.transform.localPosition = _oldControlPanelLocalPosition;
     }
 
     private void Search()
@@ -133,80 +133,4 @@ public class SettingsComponent : MonoBehaviour
             key.gameObject.SetActive(true);
         }
     }
-    
-    private enum KeyCodes
-    {
-        LeanLockRight,
-        LeanLockLeft,
-        Shoot,
-        Aim,
-        ChangeAimScope,
-        ChangeAimScopeMagnification,
-        Nidnod,
-        ToggleGoggles,
-        ToggleHeadLight,
-        SwitchHeadLight,
-        ToggleVoip,
-        PushToTalk,
-        Mumble,
-        MumbleDropdown,
-        MumbleQuick,
-        WatchTime,
-        WatchTimerAndExits,
-        Tactical,
-        NextTacticalDevice,
-        Next,
-        Previous,
-        Interact,
-        ThrowGrenade,
-        ReloadWeapon,
-        QuickReloadWeapon,
-        DropBackpack,
-        NextMagazine,
-        PreviousMagazine,
-        CheckAmmo,
-        ShootingMode,
-        ForceAutoWeaponMode,
-        CheckFireMode,
-        CheckChamber,
-        ChamberUnload,
-        UnloadMagazine,
-        Prone,
-        Sprint,
-        Duck,
-        NextWalkPose,
-        PreviousWalkPose,
-        Walk,
-        BlindShootAbove,
-        BlindShootRight,
-        StepRight,
-        StepLeft,
-        ExamineWeapon,
-        FoldStock,
-        Inventory,
-        Jump,
-        Knife,
-        QuickKnife,
-        PrimaryWeaponFirst,
-        PrimaryWeaponSecond,
-        SecondaryWeapon,
-        QuickSecondaryWeapon,
-        Slot4,
-        Slot5,
-        Slot6,
-        Slot7,
-        Slot8,
-        Slot9,
-        Slot0,
-        OpticCalibrationSwitchUp,
-        OpticCalibrationSwitchDown,
-        MakeScreenshot,
-        ThrowItem,
-        Breath,
-        ToggleInfo,
-        Console,
-        LeftStance,
-        Vaulting,
-    }
 }
-
