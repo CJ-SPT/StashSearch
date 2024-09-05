@@ -9,6 +9,7 @@ using StashSearch.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Comfort.Common;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +61,7 @@ public class TraderScreenComponent : MonoBehaviour
 
     private ScrollRect _scrollRectPlayer;
     private ScrollRect _scrollRectTrader;
-
+    
     // autocomplete
     private readonly TimeSpan _autoCompleteThrottleTime = new(0, 0, 2); // two seconds
 
@@ -84,7 +85,7 @@ public class TraderScreenComponent : MonoBehaviour
         _scrollRectTrader = (ScrollRect)AccessTools.Field(typeof(TraderDealScreen), "_traderScroll").GetValue(_traderDealScreen);
 
         _updateAssort = (DefaultUIButton)AccessTools.Field(typeof(TraderDealScreen), "_updateAssort").GetValue(_traderDealScreen);
-
+        
         // Find the RectTransform components in the scene
         foreach (var component in _traderDealScreen.GetComponentsInChildren(typeof(RectTransform), true))
         {
@@ -151,7 +152,7 @@ public class TraderScreenComponent : MonoBehaviour
         _inputFieldPlayer.text = string.Empty;
         _inputFieldTrader.text = string.Empty;
         _lastTrader = null;
-
+        
         // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
         // do it
     }
@@ -259,7 +260,7 @@ public class TraderScreenComponent : MonoBehaviour
         {
             return;
         }
-
+        
         // Recursively search, starting at the player stash
         HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
 
@@ -291,7 +292,7 @@ public class TraderScreenComponent : MonoBehaviour
         {
             _inputFieldPlayer.text = string.Empty;
         }
-
+        
         AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridViewPlayer, false);
     }
 

@@ -133,7 +133,7 @@ public class StashComponent : MonoBehaviour
             _complexStash.Transform.localPosition = _oldComplexStashLocalPosition;
             _hasMovedComplexStash = false;
         }
-
+        
         // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
         // do it
     }
@@ -170,7 +170,7 @@ public class StashComponent : MonoBehaviour
     private void Search()
     {
         Plugin.Log.LogDebug($"Search Input: {_inputField.text}");
-
+        
         // clear search if one is already pending
         if (_searchController.IsSearchedState)
         {
@@ -218,7 +218,7 @@ public class StashComponent : MonoBehaviour
         {
             _inputField.text = string.Empty;
         }
-
+        
         AccessTools.Field(typeof(GridView), "_nonInteractable").SetValue(_gridView, false);
     }
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net471</TargetFramework>
       <AssemblyName>StashSearch</AssemblyName>
       <Description>Search the stash with ease!</Description>
       <Version>1.1.1</Version>

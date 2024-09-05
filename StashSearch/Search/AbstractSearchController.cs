@@ -15,7 +15,7 @@ internal abstract class AbstractSearchController
     /// <summary>
     /// This is a list of items we want to restore once we're done with our searched items
     /// </summary>
-    public List<ContainerItem> itemsToRestore = new List<ContainerItem>();
+    protected List<ContainerItem> itemsToRestore = new();
 
     /// <summary>
     /// Restore to presearched state

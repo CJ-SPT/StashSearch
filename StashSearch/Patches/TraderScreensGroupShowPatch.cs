@@ -2,6 +2,8 @@
 using HarmonyLib;
 using StashSearch.Search;
 using System.Reflection;
+using EFT.HandBook;
+using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 
 namespace StashSearch.Patches

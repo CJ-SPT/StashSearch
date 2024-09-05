@@ -17,7 +17,7 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch;
 
-[BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.3")]
+[BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.4")]
 public class Plugin : BaseUnityPlugin
 {
     public const int TarkovVersion = 30626;
@@ -46,12 +46,11 @@ public class Plugin : BaseUnityPlugin
         new TraderDealScreenShowPatch().Enable();
         new OnScreenChangedPatch().Enable();
         new SortingTablePatch().Enable();
+        new SortPatch().Enable();
         new CanQuickMoveToPatch().Enable();
         new TraderAssortmentControllerClassSellPatch().Enable();
         new TraderAssortmentControllerClassPurchasePatch().Enable();
-
-        //new OverLappingErrorPatch().Enable();
-
+        
         // ItemUIContextPatches
         new FoldItemPatch().Enable();
         new UnloadWeaponPatch().Enable();
