@@ -1,6 +1,7 @@
 ﻿using StashSearch.Utils;
 using System;
 using System.Collections.Generic;
+using EFT.UI.DragAndDrop;
 
 namespace StashSearch.Search;
 
@@ -10,7 +11,7 @@ internal abstract class AbstractSearchController
     public string CurrentSearchString;
     public StashGridClass SearchedGrid;
     public string ParentGridId;
-    public bool IsPlayerStash;
+    public GridView GridView;
 
     /// <summary>
     /// This is a list of items we want to restore once we're done with our searched items
@@ -22,5 +23,5 @@ internal abstract class AbstractSearchController
     /// </summary>
     /// <param name="gridToRestore"></param>
     /// <exception cref="Exception"></exception>
-    public abstract void RestoreHiddenItems(StashGridClass gridToRestore);
+    public abstract void RestoreHiddenItems(StashGridClass gridToRestore, GridView gridView);
 }

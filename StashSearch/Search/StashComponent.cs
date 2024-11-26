@@ -43,7 +43,7 @@ public class StashComponent : MonoBehaviour
     private Button _searchRestoreButton;
 
     // Players main stash
-    private static StashClass _playerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
+    private static StashItemClass _playerStash => ClientAppUtils.GetMainApp().GetClientBackEndSession().Profile.Inventory.Stash;
 
     // Stash related instances
     private ItemsPanel _itemsPanel;
@@ -51,7 +51,9 @@ public class StashComponent : MonoBehaviour
     private SimpleStashPanel _simpleStash;
     private ScrollRect _scrollRect;
     private ComplexStashPanel _complexStash;
-    private GridView _gridView => _complexStash.GetComponentInChildren<GridView>();
+    private DefaultUIButton _backButton;
+    
+    private GridView _gridView => _simpleStash.GetComponentInChildren<GridView>(true);
 
     private bool _hasMovedComplexStash = false;
     private Vector2 _oldComplexStashSizeDelta;
@@ -69,9 +71,12 @@ public class StashComponent : MonoBehaviour
     {
         // Get all of the objects we need to work with
         _itemsPanel = (ItemsPanel)AccessTools.Field(typeof(InventoryScreen), "_itemsPanel").GetValue(_commonUI.InventoryScreen);
+        _backButton = (DefaultUIButton)AccessTools.Field(typeof(InventoryScreen), "_backButton").GetValue(_commonUI.InventoryScreen);
+        
         _simpleStash = (SimpleStashPanel)AccessTools.Field(typeof(ItemsPanel), "_simpleStashPanel").GetValue(_itemsPanel);
-        _scrollRect = (ScrollRect)AccessTools.Field(typeof(SimpleStashPanel), "_stashScroll").GetValue(_simpleStash);
         _complexStash = (ComplexStashPanel)AccessTools.Field(typeof(ItemsPanel), "_complexStashPanel").GetValue(_itemsPanel);
+        
+        _scrollRect = (ScrollRect)AccessTools.Field(typeof(SimpleStashPanel), "_stashScroll").GetValue(_simpleStash);
 
         // Instantiate the prefab, set its anchor to the SimpleStashPanel
         _searchObject = Instantiate(PlayerSearchBoxPrefab, _simpleStash.transform);
@@ -87,13 +92,15 @@ public class StashComponent : MonoBehaviour
 
         _inputField.onEndEdit.AddListener((_) => Search());
         _searchRestoreButton.onClick.AddListener(() => ClearSearch());
-
-        _searchController = new SearchController(true);
-        InstanceManager.SearchControllers.Add(_searchController);
-
+        
         // add autocomplete and populate autocomplete onselect
         _autoCompleteComponent = new(_inputField);
         _inputField.onSelect.AddListener((_) => PopulateAutoComplete());
+        
+        _backButton.gameObject.SetActive(false);
+        
+        _searchController = new SearchController(_gridView);
+        InstanceManager.SearchControllers.Add(_searchController);
     }
 
     private void OnEnable()
@@ -104,8 +111,8 @@ public class StashComponent : MonoBehaviour
             Plugin.Log.LogDebug($"Player in raid, not enabling search");
             return;
         }
-
-        // enable the search barD
+        
+        // enable the search bar
         _searchObject.SetActive(true);
         _searchRestoreButtonObject.SetActive(true);
 
@@ -133,9 +140,6 @@ public class StashComponent : MonoBehaviour
             _complexStash.Transform.localPosition = _oldComplexStashLocalPosition;
             _hasMovedComplexStash = false;
         }
-        
-        // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
-        // do it
     }
 
     private void Update()
@@ -208,10 +212,9 @@ public class StashComponent : MonoBehaviour
     /// <param name="clearText">If the search box text should be cleared</param>
     private void ClearSearch(bool clearText = true)
     {
-        _searchController.RestoreHiddenItems(_playerStash.Grid);
+        _searchController.RestoreHiddenItems(_playerStash.Grid, _gridView);
 
         // refresh the UI
-        _searchController.RefreshGridView(_gridView);
         _scrollRect.normalizedPosition = Vector3.up;
 
         if (clearText)

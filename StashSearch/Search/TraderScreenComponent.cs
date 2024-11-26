@@ -122,8 +122,8 @@ public class TraderScreenComponent : MonoBehaviour
         _gridViewTradingTable = (TradingTableGridView)AccessTools.Field(typeof(TradingTable), "_tableGridView").GetValue(tradingTable);
 
         // Instantiate a search controller for each grid
-        _searchControllerPlayer = new SearchController(true);
-        _searchControllerTrader = new SearchController(false);
+        _searchControllerPlayer = new SearchController(_gridViewPlayer);
+        _searchControllerTrader = new SearchController(_gridViewTrader);
 
         InstanceManager.SearchControllers.Add(_searchControllerPlayer);
         InstanceManager.SearchControllers.Add(_searchControllerTrader);
@@ -200,7 +200,7 @@ public class TraderScreenComponent : MonoBehaviour
             _inputFieldTrader.text = string.Empty;
 
             // HACK: clear the current search when trader is about to change
-            _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
+            _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid, _gridViewTrader);
 
             // reset the autocomplete throttle
             _lastAutoCompleteFillTrader = DateTime.MinValue;
@@ -262,7 +262,7 @@ public class TraderScreenComponent : MonoBehaviour
         }
         
         // Recursively search, starting at the player stash
-        HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.Id);
+        HashSet<Item> searchResult = _searchControllerPlayer.Search(_inputFieldPlayer.text.ToLower(), _gridViewPlayer.Grid, _gridViewPlayer.Grid.ID);
 
         // Set the last searched grid, so we know what to reset on the clear keybind
         SearchController.LastSearchedGrid = GridViewOwner.PlayerTradingScreen;
@@ -282,10 +282,10 @@ public class TraderScreenComponent : MonoBehaviour
             return;
         }
 
-        _searchControllerPlayer.RestoreHiddenItems(_gridViewPlayer.Grid);
+        _searchControllerPlayer.RestoreHiddenItems(_gridViewPlayer.Grid, _gridViewPlayer);
 
         // refresh the UI
-        _searchControllerPlayer.RefreshGridView(_gridViewPlayer);
+        //_searchControllerPlayer.RefreshGridView(_gridViewPlayer);
         _scrollRectPlayer.normalizedPosition = Vector3.up;
 
         if (clearText)
@@ -317,7 +317,7 @@ public class TraderScreenComponent : MonoBehaviour
         }
 
         // Search the trader
-        HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.Id);
+        HashSet<Item> searchResult = _searchControllerTrader.Search(_inputFieldTrader.text.ToLower(), _gridViewTrader.Grid, _gridViewTrader.Grid.ID);
 
         // Set the last searched grid, so we know what to reset on the clear keybind
         SearchController.LastSearchedGrid = GridViewOwner.Trader;
@@ -331,10 +331,10 @@ public class TraderScreenComponent : MonoBehaviour
 
     private void ClearTraderSearch(bool clearText = true)
     {
-        _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid);
+        _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid, _gridViewTrader);
 
         // refresh the UI
-        _searchControllerTrader.RefreshGridView(_gridViewTrader);
+        //_searchControllerTrader.RefreshGridView(_gridViewTrader);
         _scrollRectTrader.normalizedPosition = Vector3.up;
 
         if (clearText)

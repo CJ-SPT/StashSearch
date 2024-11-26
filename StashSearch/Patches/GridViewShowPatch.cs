@@ -2,6 +2,7 @@
 using HarmonyLib;
 using StashSearch.Utils;
 using System.Reflection;
+using EFT.InventoryLogic;
 using SPT.Reflection.Patching;
 
 namespace StashSearch.Patches
@@ -25,10 +26,10 @@ namespace StashSearch.Patches
                 }
 
                 // If this grid belongs to the stash, disable adding items to it
-                var rootItem = __instance.Grid.ParentItem;
+                var rootItem = (CompoundItem)__instance.Grid.ParentItem;
                 while (rootItem.Id != controller.ParentGridId && rootItem.Parent.Container.ParentItem != rootItem)
                 {
-                    rootItem = rootItem.Parent.Container.ParentItem;
+                    rootItem = rootItem.Parent.Container.ParentItem as CompoundItem;
                 }
 
                 if (rootItem.Id == controller.ParentGridId)

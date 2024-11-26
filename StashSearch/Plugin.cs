@@ -20,7 +20,7 @@ namespace StashSearch;
 [BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.4")]
 public class Plugin : BaseUnityPlugin
 {
-    public const int TarkovVersion = 30626;
+    public const int TarkovVersion = 33420;
 
     public static Plugin? Instance;
     public static ManualLogSource Log;
@@ -45,6 +45,8 @@ public class Plugin : BaseUnityPlugin
         new TraderScreensGroupShowPatch().Enable();
         new TraderDealScreenShowPatch().Enable();
         new OnScreenChangedPatch().Enable();
+        new InventoryScreenClosePatch().Enable();
+        new TraderScreenClosePatch().Enable();
         new SortingTablePatch().Enable();
         new SortPatch().Enable();
         new CanQuickMoveToPatch().Enable();

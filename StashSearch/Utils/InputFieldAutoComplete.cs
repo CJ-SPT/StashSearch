@@ -202,7 +202,7 @@ public class InputFieldAutoComplete
             {
                 AddItemToKeywords(item);
 
-                if (item is LootItemClass lootItem && lootItem.Grids.Length > 0)
+                if (item is CompoundItem lootItem && lootItem.Grids.Length > 0)
                 {
                     // Iterate over all grids on the item, and recursively call the ParseKeywordsHelper method
                     foreach (var subGrid in lootItem.Grids)

@@ -13,7 +13,7 @@ namespace StashSearch.Search;
 internal class SearchController : AbstractSearchController
 {
     public static GridViewOwner LastSearchedGrid = GridViewOwner.None;
-
+    
     /// <summary>
     /// This is a collection of items we want to show as soon as the search is complete.
     /// </summary>
@@ -21,17 +21,17 @@ internal class SearchController : AbstractSearchController
 
     // access to open windows to be able to close them
     private static FieldInfo _windowListField = AccessTools.Field(typeof(ItemUiContext), "list_0");
-
-    private static FieldInfo _windowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(LootItemClass));
+    private static FieldInfo _windowLootItemField = AccessTools.GetDeclaredFields(typeof(GridWindow)).Single(x => x.FieldType == typeof(CompoundItem));
     private static FieldInfo _windowContainerWindowField = AccessTools.Field(AccessTools.FirstInner(typeof(ItemUiContext), x => x.GetField("WindowType") != null), "Window");
+    private static FieldInfo _itemViews = AccessTools.Field(typeof(GridView), "ItemViews");
 
     private char[] _trimChars = [' ', ',', '.', '/', '\\'];
 
-    public SearchController(bool isPlayerStash)
+    public SearchController(GridView gridView)
     {
-        IsPlayerStash = isPlayerStash;
+        GridView = gridView;
     }
-
+    
     /// <summary>
     /// Initialize the search
     /// </summary>
@@ -59,7 +59,7 @@ internal class SearchController : AbstractSearchController
         foreach (var item in SearchedGrid.ContainedItems.ToArray())
         {
             itemsToRestore.Add(new ContainerItem() { Item = item.Key, Location = item.Value, Grid = gridToSearch });
-            SearchedGrid.Remove(item.Key);
+            SearchedGrid.Remove(item.Key, false);
         }
 
         Plugin.Log.LogDebug($"Found {_itemsToReshowAfterSearch.Count()} results in search");
@@ -75,7 +75,7 @@ internal class SearchController : AbstractSearchController
     /// </summary>
     /// <param name="gridToRestore"></param>
     /// <exception cref="Exception"></exception>
-    public override void RestoreHiddenItems(StashGridClass gridToRestore)
+    public override void RestoreHiddenItems(StashGridClass gridToRestore, GridView gridView)
     {
         try
         {
@@ -84,7 +84,7 @@ internal class SearchController : AbstractSearchController
             // clear the grid first
             foreach (var item in SearchedGrid.ContainedItems.ToArray())
             {
-                gridToRestore.Remove(item.Key);
+                gridToRestore.Remove(item.Key, false);
                 _itemsToReshowAfterSearch.Remove(item.Key);
             }
 
@@ -97,8 +97,10 @@ internal class SearchController : AbstractSearchController
                 {
                     item.Grid.AddItemWithoutRestrictions(item.Item, item.Location);
                 }
+                
+                gridView.method_4(item.Item, item.Location, ItemUiContext.Instance);
             }
-
+            
             // Clear the restore dict
             itemsToRestore.Clear();
 
@@ -124,7 +126,7 @@ internal class SearchController : AbstractSearchController
         {
             // If we were given search results to show, clean up the gridItemDict of any items
             // not in our search results This is required because BSG's code is broken
-            var gridItemDict = (Dictionary<string, ItemView>)AccessTools.Field(typeof(GridView), "dictionary_0").GetValue(gridView);
+            var gridItemDict = (Dictionary<string, ItemView>)_itemViews.GetValue(gridView);
 
             foreach (var itemView in gridItemDict.Values.ToArray())
             {
@@ -135,9 +137,12 @@ internal class SearchController : AbstractSearchController
                 }
             }
         }
-
+        
         // Trigger the gridView to redraw
-        gridView.OnRefreshContainer(new GEventArgs23(gridView.Grid));
+        foreach (var item in _itemsToReshowAfterSearch.ToArray().OrderBy(x => x.LocalizedName()))
+        {
+            gridView.OnRefreshItem(new GEventArgs18(item, gridView.Grid, true, true));
+        }
     }
 
     /// <summary>
@@ -153,24 +158,18 @@ internal class SearchController : AbstractSearchController
             // Iterate over all child items on the grid
             foreach (var gridItem in gridToSearch.ContainedItems.ToArray())
             {
-                //Plugin.Log.LogDebug($"Item name {gridItem.Key.Name.Localized()}");
-                //Plugin.Log.LogDebug($"Item location: Rotation: {gridItem.Value.r} X: {gridItem.Value.x} Y: {gridItem.Value.y}");
-
                 if (IsSearchedItem(gridItem.Key, searchString))
                 {
                     // Remove the item from the container, and add it to the list of things to restore
                     itemsToRestore.Add(new ContainerItem() { Item = gridItem.Key, Location = gridItem.Value, Grid = gridToSearch });
-                    gridToSearch.Remove(gridItem.Key);
+                    gridToSearch.Remove(gridItem.Key, false);
 
                     // Store the item to show in search results
                     _itemsToReshowAfterSearch.Add(gridItem.Key);
                 }
 
-                if (gridItem.Key is LootItemClass lootItem && lootItem.Grids.Length > 0)
+                if (gridItem.Key is CompoundItem lootItem && lootItem.Grids.Length > 0)
                 {
-                    //Plugin.Log.LogWarning($"This item has grids! : {lootItem.LocalizedName()}");
-                    //Plugin.Log.LogWarning($"Item: {lootItem.LocalizedName()} contains {lootItem.GetAllItems().Count()} items");
-
                     // Iterate over all grids on the item, and recursively call the SearchGrid method
                     foreach (var subGrid in lootItem.Grids)
                     {
@@ -259,7 +258,7 @@ internal class SearchController : AbstractSearchController
             }
 
             // check item parent
-            var itemParent = item.Template._parent.ToLower();
+            var itemParent = item.Template.Parent._id.ToString().ToLower();
             if (itemParent.Contains(searchTerm))
             {
                 return true;
@@ -311,7 +310,7 @@ internal class SearchController : AbstractSearchController
             }
 
             GridWindow gridWindow = (GridWindow)window;
-            var lootItem = _windowLootItemField.GetValue(gridWindow) as LootItemClass;
+            var lootItem = _windowLootItemField.GetValue(gridWindow) as CompoundItem;
             gridWindows.Add(lootItem.Id, gridWindow);
         }
 
