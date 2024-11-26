@@ -48,7 +48,6 @@ public class TraderScreenComponent : MonoBehaviour
     private GameObject _searchButtonObjectTrader;
 
     private Button _searchRestoreButtonTrader;
-    private DefaultUIButton _updateAssort;
 
     // Grid views
     private TradingGridView _gridViewPlayer;
@@ -83,8 +82,6 @@ public class TraderScreenComponent : MonoBehaviour
 
         _scrollRectPlayer = (ScrollRect)AccessTools.Field(typeof(TraderDealScreen), "_stashScroll").GetValue(_traderDealScreen);
         _scrollRectTrader = (ScrollRect)AccessTools.Field(typeof(TraderDealScreen), "_traderScroll").GetValue(_traderDealScreen);
-
-        _updateAssort = (DefaultUIButton)AccessTools.Field(typeof(TraderDealScreen), "_updateAssort").GetValue(_traderDealScreen);
         
         // Find the RectTransform components in the scene
         foreach (var component in _traderDealScreen.GetComponentsInChildren(typeof(RectTransform), true))
@@ -122,8 +119,8 @@ public class TraderScreenComponent : MonoBehaviour
         _gridViewTradingTable = (TradingTableGridView)AccessTools.Field(typeof(TradingTable), "_tableGridView").GetValue(tradingTable);
 
         // Instantiate a search controller for each grid
-        _searchControllerPlayer = new SearchController(_gridViewPlayer);
-        _searchControllerTrader = new SearchController(_gridViewTrader);
+        _searchControllerPlayer = new SearchController(_gridViewPlayer, GridViewOwner.Player);
+        _searchControllerTrader = new SearchController(_gridViewTrader, GridViewOwner.Trader);
 
         InstanceManager.SearchControllers.Add(_searchControllerPlayer);
         InstanceManager.SearchControllers.Add(_searchControllerTrader);
@@ -152,9 +149,6 @@ public class TraderScreenComponent : MonoBehaviour
         _inputFieldPlayer.text = string.Empty;
         _inputFieldTrader.text = string.Empty;
         _lastTrader = null;
-        
-        // NOTE: could potentially clear search here rather than having the OnScreenChangedPatch
-        // do it
     }
 
     private void Update()
@@ -200,7 +194,7 @@ public class TraderScreenComponent : MonoBehaviour
             _inputFieldTrader.text = string.Empty;
 
             // HACK: clear the current search when trader is about to change
-            _searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid, _gridViewTrader);
+            //_searchControllerTrader.RestoreHiddenItems(_gridViewTrader.Grid, _gridViewTrader);
 
             // reset the autocomplete throttle
             _lastAutoCompleteFillTrader = DateTime.MinValue;

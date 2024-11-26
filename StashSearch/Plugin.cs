@@ -45,7 +45,6 @@ public class Plugin : BaseUnityPlugin
         new TraderScreensGroupShowPatch().Enable();
         new TraderDealScreenShowPatch().Enable();
         new OnScreenChangedPatch().Enable();
-        new InventoryScreenClosePatch().Enable();
         new TraderScreenClosePatch().Enable();
         new SortingTablePatch().Enable();
         new SortPatch().Enable();

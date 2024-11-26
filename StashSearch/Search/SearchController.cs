@@ -27,9 +27,10 @@ internal class SearchController : AbstractSearchController
 
     private char[] _trimChars = [' ', ',', '.', '/', '\\'];
 
-    public SearchController(GridView gridView)
+    public SearchController(GridView gridView, GridViewOwner searchControllerOwner)
     {
         GridView = gridView;
+        SearchControllerOwner = searchControllerOwner;
     }
     
     /// <summary>
@@ -71,9 +72,10 @@ internal class SearchController : AbstractSearchController
     }
 
     /// <summary>
-    /// Restore to presearched state
+    /// Restore to pre-searched state
     /// </summary>
     /// <param name="gridToRestore"></param>
+    /// <param name="gridView"></param>
     /// <exception cref="Exception"></exception>
     public override void RestoreHiddenItems(StashGridClass gridToRestore, GridView gridView)
     {
@@ -98,7 +100,7 @@ internal class SearchController : AbstractSearchController
                     item.Grid.AddItemWithoutRestrictions(item.Item, item.Location);
                 }
                 
-                if (item.Grid != gridToRestore) continue;
+                if (item.Grid != gridToRestore || gridView is null) continue;
                 
                 gridView.method_4(item.Item, item.Location, ItemUiContext.Instance);
             }
@@ -106,7 +108,7 @@ internal class SearchController : AbstractSearchController
             // Clear the restore dict
             itemsToRestore.Clear();
 
-            gridView.MagnifyIfPossible();
+            gridView?.MagnifyIfPossible();
             
             // Reset the search state
             IsSearchedState = false;

@@ -3,8 +3,8 @@ using EFT.UI.Screens;
 using HarmonyLib;
 using StashSearch.Utils;
 using System.Reflection;
-using EFT.UI.DragAndDrop;
 using SPT.Reflection.Patching;
+using StashSearch.Search;
 
 namespace StashSearch.Patches;
 
@@ -23,22 +23,10 @@ internal class OnScreenChangedPatch : ModulePatch
     {
         CurrentScreen = eftScreenType;
         Logger.LogDebug($"Current screen: {eftScreenType}");
-    }
-}
 
-internal class InventoryScreenClosePatch : ModulePatch
-{
-    protected override MethodBase GetTargetMethod()
-    {
-        return AccessTools.Method(typeof(InventoryScreen), nameof(InventoryScreen.Close));
-    }
-
-    [PatchPrefix]
-    public static void PatchPrefix()
-    {
         foreach (var controller in InstanceManager.SearchControllers)
         {
-            if (controller.IsSearchedState && controller.SearchedGrid != null)
+            if (controller.IsSearchedState && controller.SearchedGrid != null || controller.SearchControllerOwner != GridViewOwner.Trader)
             {
                 controller.RestoreHiddenItems(controller.SearchedGrid, controller.GridView);
             }

@@ -12,7 +12,8 @@ internal abstract class AbstractSearchController
     public StashGridClass SearchedGrid;
     public string ParentGridId;
     public GridView GridView;
-
+    public GridViewOwner SearchControllerOwner = GridViewOwner.None;
+    
     /// <summary>
     /// This is a list of items we want to restore once we're done with our searched items
     /// </summary>

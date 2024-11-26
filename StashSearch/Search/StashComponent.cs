@@ -96,7 +96,7 @@ public class StashComponent : MonoBehaviour
         
         _backButton.gameObject.SetActive(false);
         
-        _searchController = new SearchController(_gridView);
+        _searchController = new SearchController(_gridView, GridViewOwner.Player);
         InstanceManager.SearchControllers.Add(_searchController);
     }
 
