@@ -98,12 +98,16 @@ internal class SearchController : AbstractSearchController
                     item.Grid.AddItemWithoutRestrictions(item.Item, item.Location);
                 }
                 
+                if (item.Grid != gridToRestore) continue;
+                
                 gridView.method_4(item.Item, item.Location, ItemUiContext.Instance);
             }
             
             // Clear the restore dict
             itemsToRestore.Clear();
 
+            gridView.MagnifyIfPossible();
+            
             // Reset the search state
             IsSearchedState = false;
             CurrentSearchString = string.Empty;
@@ -114,7 +118,7 @@ internal class SearchController : AbstractSearchController
             throw new Exception("Search action exception:", e);
         }
     }
-
+    
     /// <summary>
     /// Refreshes the grid view after search
     /// </summary>
@@ -122,6 +126,7 @@ internal class SearchController : AbstractSearchController
     /// <param name="searchResult"></param>
     public void RefreshGridView(GridView gridView, HashSet<Item>? searchResult = null)
     {
+        
         if (searchResult != null)
         {
             // If we were given search results to show, clean up the gridItemDict of any items
@@ -137,6 +142,8 @@ internal class SearchController : AbstractSearchController
                 }
             }
         }
+        
+        gridView.MagnifyIfPossible();
         
         // Trigger the gridView to redraw
         foreach (var item in _itemsToReshowAfterSearch.ToArray().OrderBy(x => x.LocalizedName()))
