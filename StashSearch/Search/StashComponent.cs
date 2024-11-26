@@ -58,10 +58,7 @@ public class StashComponent : MonoBehaviour
     private bool _hasMovedComplexStash = false;
     private Vector2 _oldComplexStashSizeDelta;
     private Vector3 _oldComplexStashLocalPosition;
-
-    // Get the session
-    public static ISession _session => ClientAppUtils.GetMainApp().GetClientBackEndSession();
-
+    
     public StashComponent()
     {
         Instance = this;
