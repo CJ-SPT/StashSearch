@@ -80,8 +80,8 @@ public class StashComponent : MonoBehaviour
         _searchRestoreButtonObject = Instantiate(SearchRestoreButtonPrefab, _simpleStash.transform);
 
         // Adjust the rects anchored position
-        _searchObject.RectTransform().anchoredPosition = new Vector3(-52, 73);
-        _searchRestoreButtonObject.RectTransform().anchoredPosition = new Vector3(290, 73);
+        _searchObject.RectTransform().anchoredPosition = new Vector3(20, 73);
+        _searchRestoreButtonObject.RectTransform().anchoredPosition = new Vector3(265, 73);
 
         // Add the search listener as a delegate method
         _inputField = _searchObject.GetComponentInChildren<TMP_InputField>();

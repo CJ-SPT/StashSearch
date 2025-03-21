@@ -225,8 +225,8 @@ public class TraderScreenComponent : MonoBehaviour
         _searchButtonObjectTrader.RectTransform().anchoredPosition = new Vector2(310, 76);
 
         // Player search UI elements
-        _searchBoxObjectPlayer.RectTransform().anchoredPosition = new Vector2(-70, 76);
-        _searchButtonObjectPlayer.RectTransform().anchoredPosition = new Vector2(270, 76);
+        _searchBoxObjectPlayer.RectTransform().anchoredPosition = new Vector2(-125, 76);
+        _searchButtonObjectPlayer.RectTransform().anchoredPosition = new Vector2(120, 76);
     }
 
     private void SearchStash()

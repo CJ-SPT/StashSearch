@@ -17,10 +17,10 @@ using static StashSearch.Utils.InstanceManager.SearchObjects;
 
 namespace StashSearch;
 
-[BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.3.4")]
+[BepInPlugin("com.dirtbikercj.StashSearch", "StashSearch", "1.4.1")]
 public class Plugin : BaseUnityPlugin
 {
-    public const int TarkovVersion = 33420;
+    public const int TarkovVersion = 35392;
 
     public static Plugin? Instance;
     public static ManualLogSource Log;
